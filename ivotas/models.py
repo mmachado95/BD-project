@@ -15,7 +15,9 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             faculdade_id integer NOT NULL,
             nome VARCHAR(255) NOT NULL,
-            FOREIGN KEY (faculdade_id) REFERENCES faculdade (id)
+            FOREIGN KEY (faculdade_id)
+                REFERENCES faculdade (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -29,7 +31,9 @@ def create_tables():
             cc VARCHAR(10) NOT NULL,
             data_validade date NOT NULL,
             tipo smallint NOT NULL,
-            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
+            FOREIGN KEY (departmento_id)
+                REFERENCES departamento (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -45,31 +49,45 @@ def create_tables():
         """
         CREATE TABLE conselho_geral (
             id integer PRIMARY KEY,
-            FOREIGN KEY (id) REFERENCES eleicao (id)
+            FOREIGN KEY (id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
         CREATE TABLE nucleo_de_estudantes (
             id integer PRIMARY KEY,
             departmento_id integer NOT NULL,
-            FOREIGN KEY (id) REFERENCES eleicao (id),
-            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
+            FOREIGN KEY (id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (departmento_id)
+                REFERENCES departamento (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
         CREATE TABLE direcao_departamento (
             id integer PRIMARY KEY,
             departmento_id integer NOT NULL,
-            FOREIGN KEY (id) REFERENCES eleicao (id),
-            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
+            FOREIGN KEY (id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (departmento_id)
+                REFERENCES departamento (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
         CREATE TABLE direcao_faculdade (
             id integer PRIMARY KEY,
             faculdade_id integer NOT NULL,
-            FOREIGN KEY (id) REFERENCES eleicao (id),
-            FOREIGN KEY (faculdade_id) REFERENCES faculdade (id)
+            FOREIGN KEY (id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (faculdade_id)
+                REFERENCES faculdade (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -78,15 +96,21 @@ def create_tables():
             eleicao_id integer NOT NULL,
             name varchar(100) NOT NULL,
             type smallint NOT NULL,
-            FOREIGN KEY (eleicao_id) REFERENCES eleicao (id)
+            FOREIGN KEY (eleicao_id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
-        CREATE TABLE lista_de_candidato (
+        CREATE TABLE lista_de_candidatos (
             lista_id integer NOT NULL,
             pessoa_id integer NOT NULL,
-            FOREIGN KEY (lista_id) REFERENCES lista (id),
-            FOREIGN KEY (pessoa_id) REFERENCES pessoa (id)
+            FOREIGN KEY (lista_id)
+                REFERENCES lista (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (pessoa_id)
+                REFERENCES pessoa (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
@@ -94,15 +118,21 @@ def create_tables():
             id SERIAL PRIMARY KEY,
             eleicao_id integer NOT NULL,
             departmento_id integer NOT NULL,
-            FOREIGN KEY (eleicao_id) REFERENCES eleicao (id),
-            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
+            FOREIGN KEY (eleicao_id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (departmento_id)
+                REFERENCES departamento (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
         """
-        CREATE TABLE terminais_de_voto (
+        CREATE TABLE terminal_de_voto (
             id SERIAL PRIMARY KEY,
             mesa_de_voto_id integer NOT NULL,
-            FOREIGN KEY (mesa_de_voto_id) REFERENCES mesa_de_voto (id)
+            FOREIGN KEY (mesa_de_voto_id)
+                REFERENCES mesa_de_voto (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
     )
