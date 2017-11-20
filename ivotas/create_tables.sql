@@ -28,9 +28,13 @@ CREATE TABLE eleicao (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(500) NOT NULL,
-    inicio date NOT NULL,
-    fim date NOT NULL,
-    acabou boolean NOT NULL
+    inicio timestamp NOT NULL,
+    fim timestamp NOT NULL,
+    acabou boolean NOT NULL,
+    votos_brancos integer DEFAULT 0,
+    percentagem_brancos real DEFAULT 0.0,
+    votos_nulos integer DEFAULT 0,
+    percentagem_nulos real DEFAULT 0.0
 );
 CREATE TABLE conselho_geral (
     id integer PRIMARY KEY,
