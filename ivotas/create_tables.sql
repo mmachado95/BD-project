@@ -17,7 +17,7 @@ CREATE TABLE pessoa (
     password VARCHAR(100) NOT NULL,
     contacto VARCHAR(100) NOT NULL,
     morada VARCHAR(100) NOT NULL,
-    cc VARCHAR(10) NOT NULL,
+    cc VARCHAR(10) NOT NULL UNIQUE,
     data_validade date NOT NULL,
     tipo smallint NOT NULL,
     FOREIGN KEY (departmento_id)
