@@ -135,6 +135,46 @@ def create_tables():
                 ON UPDATE CASCADE ON DELETE CASCADE
         )
         """,
+        """
+        CREATE TABLE voto (
+            id SERIAL PRIMARY KEY,
+            pessoa_id integer NOT NULL,
+            eleicao_id integer NOT NULL,
+            departamento_id integer NOT NULL,
+            FOREIGN KEY (pessoa_id)
+                REFERENCES pessoa (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (eleicao_id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (departamento_id)
+                REFERENCES departamento (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE resultados_lista (
+            id SERIAL PRIMARY KEY,
+            lista_id integer NOT NULL,
+            numero_votos integer NOT NULL,
+            percentagem_votos real NOT NULL,
+            FOREIGN KEY (lista_id)
+                REFERENCES lista (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """,
+        """
+        CREATE TABLE resultados (
+            eleicao_id integer NOT NULL,
+            resultados_lista_id integer NOT NULL,
+            FOREIGN KEY (eleicao_id)
+                REFERENCES eleicao (id)
+                ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (resultados_lista_id)
+                REFERENCES resultados_lista (id)
+                ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """,
     )
 
     conn = None
