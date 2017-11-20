@@ -5,104 +5,104 @@ def create_tables():
     # TODO missing votes and results tables
     commands = (
         """
-        CREATE TABLE faculties (
+        CREATE TABLE faculdade (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL
+            nome VARCHAR(255) NOT NULL
         )
         """,
         """
-        CREATE TABLE departments (
+        CREATE TABLE departamento (
             id SERIAL PRIMARY KEY,
-            faculty_id integer,
-            name VARCHAR(255) NOT NULL,
-            FOREIGN KEY (faculty_id) REFERENCES faculties (id)
+            faculdade_id integer NOT NULL,
+            nome VARCHAR(255) NOT NULL,
+            FOREIGN KEY (faculdade_id) REFERENCES faculdade (id)
         )
         """,
         """
-        CREATE TABLE users (
+        CREATE TABLE pessoa (
             id SERIAL PRIMARY KEY,
-            department_id integer,
-            name VARCHAR(100) NOT NULL,
+            departmento_id integer NOT NULL,
+            nome VARCHAR(100) NOT NULL,
             password VARCHAR(100) NOT NULL,
-            contact VARCHAR(100) NOT NULL,
-            address VARCHAR(100) NOT NULL,
+            contacto VARCHAR(100) NOT NULL,
+            morada VARCHAR(100) NOT NULL,
             cc VARCHAR(10) NOT NULL,
-            expire_date date NOT NULL,
-            type smallint NOT NULL,
-            FOREIGN KEY (department_id) REFERENCES departments (id)
+            data_validade date NOT NULL,
+            tipo smallint NOT NULL,
+            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
         )
         """,
         """
-        CREATE TABLE elections (
+        CREATE TABLE eleicao (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            description VARCHAR(500) NOT NULL,
-            start_date date NOT NULL,
-            end_date date NOT NULL,
-            finished boolean NOT NULL
+            nome VARCHAR(100) NOT NULL,
+            descricao VARCHAR(500) NOT NULL,
+            inicio date NOT NULL,
+            fim date NOT NULL,
+            acabou boolean NOT NULL
         )
         """,
         """
         CREATE TABLE conselho_geral (
             id integer PRIMARY KEY,
-            FOREIGN KEY (id) REFERENCES elections (id)
+            FOREIGN KEY (id) REFERENCES eleicao (id)
         )
         """,
         """
         CREATE TABLE nucleo_de_estudantes (
             id integer PRIMARY KEY,
-            department_id integer,
-            FOREIGN KEY (id) REFERENCES elections (id),
-            FOREIGN KEY (department_id) REFERENCES departments (id)
+            departmento_id integer NOT NULL,
+            FOREIGN KEY (id) REFERENCES eleicao (id),
+            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
         )
         """,
         """
         CREATE TABLE direcao_departamento (
             id integer PRIMARY KEY,
-            department_id integer,
-            FOREIGN KEY (id) REFERENCES elections (id),
-        FOREIGN KEY (department_id) REFERENCES departments (id)
+            departmento_id integer NOT NULL,
+            FOREIGN KEY (id) REFERENCES eleicao (id),
+            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
         )
         """,
         """
         CREATE TABLE direcao_faculdade (
             id integer PRIMARY KEY,
-            faculty_id integer,
-            FOREIGN KEY (id) REFERENCES elections (id),
-            FOREIGN KEY (faculty_id) REFERENCES faculties (id)
+            faculdade_id integer NOT NULL,
+            FOREIGN KEY (id) REFERENCES eleicao (id),
+            FOREIGN KEY (faculdade_id) REFERENCES faculdade (id)
         )
         """,
         """
-        CREATE TABLE lists (
+        CREATE TABLE lista (
             id integer PRIMARY KEY,
-            election_id integer,
+            eleicao_id integer NOT NULL,
             name varchar(100) NOT NULL,
             type smallint NOT NULL,
-            FOREIGN KEY (id) REFERENCES elections (id)
+            FOREIGN KEY (eleicao_id) REFERENCES eleicao (id)
         )
         """,
         """
-        CREATE TABLE candidates_lists (
-            list_id integer,
-            user_id integer,
-            FOREIGN KEY (list_id) REFERENCES lists (id),
-            FOREIGN KEY (user_id) REFERENCES users (id)
+        CREATE TABLE lista_de_candidato (
+            lista_id integer NOT NULL,
+            pessoa_id integer NOT NULL,
+            FOREIGN KEY (lista_id) REFERENCES lista (id),
+            FOREIGN KEY (pessoa_id) REFERENCES pessoa (id)
         )
         """,
         """
-        CREATE TABLE voting_tables (
+        CREATE TABLE mesa_de_voto (
             id SERIAL PRIMARY KEY,
-            election_id integer,
-            department_id integer,
-            FOREIGN KEY (election_id) REFERENCES elections (id),
-            FOREIGN KEY (department_id) REFERENCES departments (id)
+            eleicao_id integer NOT NULL,
+            departmento_id integer NOT NULL,
+            FOREIGN KEY (eleicao_id) REFERENCES eleicao (id),
+            FOREIGN KEY (departmento_id) REFERENCES departamento (id)
         )
         """,
         """
-        CREATE TABLE voting_terminal (
+        CREATE TABLE terminais_de_voto (
             id SERIAL PRIMARY KEY,
-            voting_table_id integer,
-            FOREIGN KEY (voting_table_id) REFERENCES voting_tables (id)
+            mesa_de_voto_id integer NOT NULL,
+            FOREIGN KEY (mesa_de_voto_id) REFERENCES mesa_de_voto (id)
         )
         """,
     )
