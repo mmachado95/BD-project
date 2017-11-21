@@ -18,7 +18,8 @@ def create_tables():
 
         # create table one by one
         for command in commands:
-            if command.strip() != '':
+            # empty line or comment
+            if command.strip() != '' or command[0:2]=='--':
                 cur.execute(command)
 
         # close communication with the PostgreSQL database server
