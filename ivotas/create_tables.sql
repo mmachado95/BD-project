@@ -52,8 +52,8 @@ CREATE TABLE eleicao (
 CREATE TABLE lista (
     id integer PRIMARY KEY,
     eleicao_id integer NOT NULL,
-    name varchar(100) NOT NULL,
-    type smallint NOT NULL,
+    nome varchar(100) NOT NULL,
+    tipo smallint NOT NULL,
     FOREIGN KEY (eleicao_id)
         REFERENCES eleicao (id)
         ON UPDATE CASCADE ON DELETE CASCADE
