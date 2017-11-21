@@ -12,7 +12,7 @@ CREATE TABLE departamento (
 );
 CREATE TABLE pessoa (
     id SERIAL PRIMARY KEY,
-    departmento_id integer NOT NULL,
+    departamento_id integer NOT NULL,
     nome VARCHAR(100) NOT NULL,
     password VARCHAR(100) NOT NULL,
     contacto VARCHAR(100) NOT NULL,
@@ -20,57 +20,34 @@ CREATE TABLE pessoa (
     cc VARCHAR(10) NOT NULL UNIQUE,
     data_validade date NOT NULL,
     tipo smallint NOT NULL,
-    FOREIGN KEY (departmento_id)
+    FOREIGN KEY (departamento_id)
         REFERENCES departamento (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+-- 1- conselho geral
+-- 2- nucleo estudantes
+-- 3- dir faculdade
+-- 4- dir dep
 CREATE TABLE eleicao (
     id SERIAL PRIMARY KEY,
+    faculdade_id integer,
+    departamento_id integer,
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(500) NOT NULL,
     inicio timestamp NOT NULL,
     fim timestamp NOT NULL,
     acabou boolean NOT NULL,
+    tipo smallint NOT NULL,
     votos_brancos integer DEFAULT 0,
     percentagem_brancos real DEFAULT 0.0,
     votos_nulos integer DEFAULT 0,
-    percentagem_nulos real DEFAULT 0.0
-);
-CREATE TABLE conselho_geral (
-    id integer PRIMARY KEY,
-    FOREIGN KEY (id)
-        REFERENCES eleicao (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-);
-CREATE TABLE nucleo_de_estudantes (
-    id integer PRIMARY KEY,
-    departmento_id integer NOT NULL,
-    FOREIGN KEY (id)
-        REFERENCES eleicao (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (departmento_id)
-        REFERENCES departamento (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-);
-CREATE TABLE direcao_departamento (
-    id integer PRIMARY KEY,
-    departmento_id integer NOT NULL,
-    FOREIGN KEY (id)
-        REFERENCES eleicao (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (departmento_id)
-        REFERENCES departamento (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
-);
-CREATE TABLE direcao_faculdade (
-    id integer PRIMARY KEY,
-    faculdade_id integer NOT NULL,
-    FOREIGN KEY (id)
-        REFERENCES eleicao (id)
-        ON UPDATE CASCADE ON DELETE CASCADE,
+    percentagem_nulos real DEFAULT 0.0,
     FOREIGN KEY (faculdade_id)
-        REFERENCES faculdade (id)
-        ON UPDATE CASCADE ON DELETE CASCADE
+      REFERENCES faculdade (id)
+      ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (departamento_id)
+      REFERENCES departamento (id)
+      ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE TABLE lista (
     id integer PRIMARY KEY,
@@ -94,11 +71,11 @@ CREATE TABLE lista_de_candidatos (
 CREATE TABLE mesa_de_voto (
     id SERIAL PRIMARY KEY,
     eleicao_id integer NOT NULL,
-    departmento_id integer NOT NULL,
+    departamento_id integer NOT NULL,
     FOREIGN KEY (eleicao_id)
         REFERENCES eleicao (id)
         ON UPDATE CASCADE ON DELETE CASCADE,
-    FOREIGN KEY (departmento_id)
+    FOREIGN KEY (departamento_id)
         REFERENCES departamento (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
