@@ -50,7 +50,7 @@ CREATE TABLE eleicao (
       ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE TABLE lista (
-    id integer PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     eleicao_id integer NOT NULL,
     nome varchar(100) NOT NULL,
     tipo smallint NOT NULL,
