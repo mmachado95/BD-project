@@ -1,3 +1,17 @@
+-- Delete old tables if they exist
+DROP TABLE IF EXISTS resultados;
+DROP TABLE IF EXISTS resultados_lista;
+DROP TABLE IF EXISTS voto;
+DROP TABLE IF EXISTS terminal_de_voto;
+DROP TABLE IF EXISTS mesa_de_voto;
+DROP TABLE IF EXISTS lista_de_candidatos;
+DROP TABLE IF EXISTS lista;
+DROP TABLE IF EXISTS eleicao;
+DROP TABLE IF EXISTS pessoa;
+DROP TABLE IF EXISTS departamento;
+DROP TABLE IF EXISTS faculdade;
+
+
 CREATE TABLE faculdade (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL
