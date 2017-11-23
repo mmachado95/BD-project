@@ -155,3 +155,44 @@ def create_user(name, department, password, contact, address, cc, end_date, type
     cur.close()
     # commit the changes
     conn.commit()
+
+
+"""
+Create new election
+"""
+def create_election(name, faculty, department, description, start, end, finished, type):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # fetch faculty_id of election
+        cur.execute(
+            'SELECT id FROM faculdade WHERE nome= %(name)s',
+            {'name': faculty}
+        )
+        faculty_id = cur.fetchone()
+
+        # fetch department_id of election
+        cur.execute(
+            'SELECT id FROM departamento WHERE nome= %(name)s',
+            {'name': department}
+        )
+        department_id = cur.fetchone()
+
+        # insert election in table
+        insert_statement = '''
+            INSERT INTO eleicao(faculdade_id, departamento_id, nome, descricao, inicio, fim, acabou, tipo)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        cur.execute(insert_statement, (faculty_id, department_id, name, description, start, end, finished, type))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
