@@ -6,6 +6,7 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
     models.create_tables()
+    models.seed_tables()
     return "Hello World!"
 
 
