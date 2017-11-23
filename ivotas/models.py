@@ -1,26 +1,14 @@
 import psycopg2
 
+
+def get_commands(filename):
+    f = open(filename, 'r')
+    commands = f.read()
+    return commands.split(';')
+
+
 def create_tables():
-    commands = (
-        """
-        CREATE TABLE users (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            password VARCHAR(100) NOT NULL,
-            contact VARCHAR(100) NOT NULL,
-            address VARCHAR(100) NOT NULL,
-            cc VARCHAR(10) NOT NULL,
-            expire_date date NOT NULL,
-            type smallint NOT NULL
-        )
-        """,
-        """
-        CREATE TABLE faculties (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL
-        )
-        """,
-    )
+    commands = get_commands('ivotas/create_tables.sql')
 
     conn = None
     try:
@@ -30,7 +18,9 @@ def create_tables():
 
         # create table one by one
         for command in commands:
-            cur.execute(command)
+            # empty line or comment
+            if command.strip() != '' or command[0:2]=='--':
+                cur.execute(command)
 
         # close communication with the PostgreSQL database server
         cur.close()
