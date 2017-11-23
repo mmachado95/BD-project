@@ -1,12 +1,18 @@
 import psycopg2
 
 
+"""
+Parse sql file for commands to run
+"""
 def get_commands(filename):
     f = open(filename, 'r')
     commands = f.read()
     return commands.split(';')
 
 
+"""
+Create tables at startup
+"""
 def create_tables():
     commands = get_commands('ivotas/create_tables.sql')
 
@@ -30,6 +36,9 @@ def create_tables():
         print(error)
 
 
+"""
+Seed tables with test values
+"""
 def seed_tables():
     commands = get_commands('ivotas/seeds.sql')
 
