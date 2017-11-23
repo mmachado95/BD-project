@@ -59,3 +59,41 @@ def seed_tables():
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
+
+#################################
+### Create records functions  ###
+#################################
+
+"""
+Register new user
+"""
+def create_user(name, department, password, contact, address, cc, end_date, type):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # fetch department_id of user
+        cur.execute(
+            'SELECT id FROM departamento WHERE nome= %(name)s',
+            {'name': department}
+        )
+        department_id = cur.fetchone()
+
+        # insert user in table
+        insert_statement = '''
+            INSERT INTO pessoa(departamento_id, nome, password, contacto, morada, cc, data_validade, tipo)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        cur.execute(insert_statement, (department_id, name, password, contact, address, cc, end_date, type,))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
