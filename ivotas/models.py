@@ -66,7 +66,31 @@ def seed_tables():
 #################################
 
 """
-Register new user
+Create new faculty
+"""
+def create_faculty(name):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # insert faculty in table
+        insert_statement = '''INSERT INTO faculdade(nome) VALUES(%s)'''
+        cur.execute(insert_statement, (name,))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
+
+
+"""
+Create new user
 """
 def create_user(name, department, password, contact, address, cc, end_date, type):
     conn = None
