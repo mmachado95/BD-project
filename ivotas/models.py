@@ -90,6 +90,40 @@ def create_faculty(name):
 
 
 """
+Create new department
+"""
+def create_department(name, faculty):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # fetch faculty_id of department
+        cur.execute(
+            'SELECT id FROM faculdade WHERE nome=%(name)s',
+            {'name': faculty}
+        )
+        faculty_id = cur.fetchone()
+
+        # insert department in table
+        insert_statement = '''
+            INSERT INTO departamento(faculdade_id, nome)
+            VALUES(%s, %s)
+        '''
+        cur.execute(insert_statement, (faculty_id, name,))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
+
+
+"""
 Create new user
 """
 def create_user(name, department, password, contact, address, cc, end_date, type):
