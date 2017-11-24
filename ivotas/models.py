@@ -196,3 +196,48 @@ def create_election(name, faculty, department, description, start, end, finished
     cur.close()
     # commit the changes
     conn.commit()
+
+
+"""
+Create new list for election
+"""
+def create_list(name, election, type, users_ids):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # fetch election_id of list
+        cur.execute(
+            'SELECT id FROM eleicao WHERE nome=%(name)s',
+            {'name': election}
+        )
+        election_id = cur.fetchone()
+
+        # insert list
+        insert_statement = '''
+            INSERT INTO lista(eleicao_id, nome, tipo)
+            VALUES(%s, %s, %s)
+            RETURNING id
+        '''
+        cur.execute(insert_statement, (election_id, name, type))
+
+        # get list id and create new insert statement
+        list_id = cur.fetchone()[0]
+        insert_statement = '''
+            INSERT INTO lista_de_candidatos(lista_id, pessoa_id)
+            VALUES(%s, %s)
+        '''
+
+        # add users to list
+        for user_id in users_ids:
+            cur.execute(insert_statement, (list_id, user_id))
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
