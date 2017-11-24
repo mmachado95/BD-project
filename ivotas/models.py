@@ -206,3 +206,30 @@ def create_list(election_id, name, type, users_ids):
     cur.close()
     # commit the changes
     conn.commit()
+
+
+"""
+Create new voting table
+"""
+def create_voting_table(election_id, department_id):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # insert voting table
+        insert_statement = '''
+            INSERT INTO mesa_de_voto(eleicao_id, departamento_id)
+            VALUES(%s, %s)
+        '''
+        cur.execute(insert_statement, (election_id, department_id))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
