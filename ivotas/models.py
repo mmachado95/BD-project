@@ -92,20 +92,13 @@ def create_faculty(name):
 """
 Create new department
 """
-def create_department(name, faculty):
+def create_department(faculty_id, name):
     conn = None
     try:
         # connect to database and create cursor to execute commands in database session
         conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
         conn = psycopg2.connect(conn_params)
         cur = conn.cursor()
-
-        # fetch faculty_id of department
-        cur.execute(
-            'SELECT id FROM faculdade WHERE nome=%(name)s',
-            {'name': faculty}
-        )
-        faculty_id = cur.fetchone()
 
         # insert department in table
         insert_statement = '''
@@ -126,20 +119,13 @@ def create_department(name, faculty):
 """
 Create new user
 """
-def create_user(name, department, password, contact, address, cc, end_date, type):
+def create_user(department_id, name, password, contact, address, cc, end_date, type):
     conn = None
     try:
         # connect to database and create cursor to execute commands in database session
         conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
         conn = psycopg2.connect(conn_params)
         cur = conn.cursor()
-
-        # fetch department_id of user
-        cur.execute(
-            'SELECT id FROM departamento WHERE nome= %(name)s',
-            {'name': department}
-        )
-        department_id = cur.fetchone()
 
         # insert user in table
         insert_statement = '''
@@ -160,27 +146,13 @@ def create_user(name, department, password, contact, address, cc, end_date, type
 """
 Create new election
 """
-def create_election(name, faculty, department, description, start, end, finished, type):
+def create_election(faculty_id, department_id, name, description, start, end, finished, type):
     conn = None
     try:
         # connect to database and create cursor to execute commands in database session
         conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
         conn = psycopg2.connect(conn_params)
         cur = conn.cursor()
-
-        # fetch faculty_id of election
-        cur.execute(
-            'SELECT id FROM faculdade WHERE nome= %(name)s',
-            {'name': faculty}
-        )
-        faculty_id = cur.fetchone()
-
-        # fetch department_id of election
-        cur.execute(
-            'SELECT id FROM departamento WHERE nome= %(name)s',
-            {'name': department}
-        )
-        department_id = cur.fetchone()
 
         # insert election in table
         insert_statement = '''
@@ -201,20 +173,13 @@ def create_election(name, faculty, department, description, start, end, finished
 """
 Create new list for election
 """
-def create_list(name, election, type, users_ids):
+def create_list(election_id, name, type, users_ids):
     conn = None
     try:
         # connect to database and create cursor to execute commands in database session
         conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
         conn = psycopg2.connect(conn_params)
         cur = conn.cursor()
-
-        # fetch election_id of list
-        cur.execute(
-            'SELECT id FROM eleicao WHERE nome=%(name)s',
-            {'name': election}
-        )
-        election_id = cur.fetchone()
 
         # insert list
         insert_statement = '''
