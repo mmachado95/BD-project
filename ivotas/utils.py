@@ -14,10 +14,10 @@ def get_commands(filename):
 """
 Connect to database
 """
-def connect_db():
+def connect_db(_host, _dbname, _user, _password):
     conn = None
     try:
-        conn = psycopg2.connect(host='localhost', dbname='ivotas', user='Machado', password='')
+        conn = psycopg2.connect(host=_host, dbname=_dbname, user=_user, password=_password)
     except(Exception, psycopg2.DatabaseError) as error:
         print('Unable to connect to database %s' % error)
     return conn
@@ -26,10 +26,10 @@ def connect_db():
 """
 Safe get  connection to dabase
 """
-def get_db():
+def get_db(dbname):
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = connect_db()
+        db = g._database = connect_db('localhost', dbname, 'Machado', '')
     return db
 
 
