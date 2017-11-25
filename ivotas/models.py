@@ -314,3 +314,30 @@ def create_list_results(list_id, number_of_votes, percentage_of_votes):
     cur.close()
     # commit the changes
     conn.commit()
+
+
+"""
+Create new results
+"""
+def create_results(election_id, list_results_id):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # insert results
+        insert_statement = '''
+            INSERT INTO resultados(eleicao_id, resultados_lista_id)
+            VALUES(%s, %s)
+        '''
+        cur.execute(insert_statement, (election_id, list_results_id,))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
