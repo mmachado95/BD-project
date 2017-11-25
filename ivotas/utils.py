@@ -1,4 +1,5 @@
 import psycopg2
+from flask import g
 
 
 """
@@ -19,5 +20,23 @@ def connect_db():
         conn = psycopg2.connect(host='localhost', dbname='ivotas', user='Machado', password='')
     except(Exception, psycopg2.DatabaseError) as error:
         print('Unable to connect to database %s' % error)
-    finally:
-        return conn
+    return conn
+
+
+"""
+Safe get  connection to dabase
+"""
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = connect_db()
+    return db
+
+
+"""
+Safe close database connection
+"""
+def close_db():
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close

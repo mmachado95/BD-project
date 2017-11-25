@@ -1,5 +1,5 @@
 import psycopg2
-from ivotas.utils import get_commands, connect_db
+from ivotas.utils import get_commands, get_db, close_db
 
 
 """
@@ -10,8 +10,7 @@ def create_tables():
 
     conn = None
     try:
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # create table one by one
         for command in commands:
@@ -19,12 +18,15 @@ def create_tables():
             if command.strip() != '' or command[0:2]=='--':
                 cur.execute(command)
 
+        # commit the changes
+        get_db().commit()
+
         # close communication with the PostgreSQL database server
         cur.close()
-        # commit the changes
-        conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+    finally:
+        close_db()
 
 
 """
@@ -35,20 +37,22 @@ def seed_tables():
 
     conn = None
     try:
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # create table one by one
         for command in commands:
             if command.strip() != '':
                 cur.execute(command)
 
+        # commit the changes
+        get_db().commit()
+
         # close communication with the PostgreSQL database server
         cur.close()
-        # commit the changes
-        conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+    finally:
+        close_db()
 
 
 #################################
@@ -59,34 +63,32 @@ def seed_tables():
 Create new faculty
 """
 def create_faculty(name):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert faculty in table
         insert_statement = '''INSERT INTO faculdade(nome) VALUES(%s)'''
         cur.execute(insert_statement, (name,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new department
 """
 def create_department(faculty_id, name):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert department in table
         insert_statement = '''
@@ -95,24 +97,24 @@ def create_department(faculty_id, name):
         '''
         cur.execute(insert_statement, (faculty_id, name,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new user
 """
 def create_user(department_id, name, password, contact, address, cc, end_date, type):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert user in table
         insert_statement = '''
@@ -121,24 +123,24 @@ def create_user(department_id, name, password, contact, address, cc, end_date, t
         '''
         cur.execute(insert_statement, (department_id, name, password, contact, address, cc, end_date, type,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new election
 """
 def create_election(faculty_id, department_id, name, description, start, end, finished, type):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert election in table
         insert_statement = '''
@@ -147,24 +149,24 @@ def create_election(faculty_id, department_id, name, description, start, end, fi
         '''
         cur.execute(insert_statement, (faculty_id, department_id, name, description, start, end, finished, type,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new list for election
 """
 def create_list(election_id, name, type, users_ids):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert list
         insert_statement = '''
@@ -184,24 +186,24 @@ def create_list(election_id, name, type, users_ids):
         # add users to list
         for user_id in users_ids:
             cur.execute(insert_statement, (list_id, user_id))
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new voting table
 """
 def create_voting_table(election_id, department_id):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert voting table
         insert_statement = '''
@@ -210,24 +212,24 @@ def create_voting_table(election_id, department_id):
         '''
         cur.execute(insert_statement, (election_id, department_id,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new voting terminal
 """
 def create_voting_terminal(voting_table_id):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert voting terminal
         insert_statement = '''
@@ -236,24 +238,24 @@ def create_voting_terminal(voting_table_id):
         '''
         cur.execute(insert_statement, (voting_table_id,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new vote
 """
 def create_vote(user_id, election_id, department_id):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert vote
         insert_statement = '''
@@ -262,24 +264,24 @@ def create_vote(user_id, election_id, department_id):
         '''
         cur.execute(insert_statement, (user_id, election_id, department_id,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new list results
 """
 def create_list_results(list_id, number_of_votes, percentage_of_votes):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert list results
         insert_statement = '''
@@ -288,24 +290,24 @@ def create_list_results(list_id, number_of_votes, percentage_of_votes):
         '''
         cur.execute(insert_statement, (list_id, number_of_votes, percentage_of_votes,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
 
 
 """
 Create new results
 """
 def create_results(election_id, list_results_id):
-    conn = None
     try:
         # connect to database and create cursor to execute commands in database session
-        conn = connect_db()
-        cur = conn.cursor()
+        cur = get_db().cursor()
 
         # insert results
         insert_statement = '''
@@ -314,10 +316,12 @@ def create_results(election_id, list_results_id):
         '''
         cur.execute(insert_statement, (election_id, list_results_id,))
 
+        # commit the changes
+        get_db().commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    # close communication with the PostgreSQL database server
-    cur.close()
-    # commit the changes
-    conn.commit()
+    finally:
+        close_db()
