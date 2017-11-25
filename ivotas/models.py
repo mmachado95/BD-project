@@ -260,3 +260,30 @@ def create_voting_terminal(voting_table_id):
     cur.close()
     # commit the changes
     conn.commit()
+
+
+"""
+Create new vote
+"""
+def create_vote(user_id, election_id, department_id):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # insert vote
+        insert_statement = '''
+            INSERT INTO voto(pessoa_id, eleicao_id, departamento_id)
+            VALUES(%s, %s, %s)
+        '''
+        cur.execute(insert_statement, (user_id, election_id, department_id))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
