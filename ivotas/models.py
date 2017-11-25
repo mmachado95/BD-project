@@ -159,7 +159,7 @@ def create_election(faculty_id, department_id, name, description, start, end, fi
             INSERT INTO eleicao(faculdade_id, departamento_id, nome, descricao, inicio, fim, acabou, tipo)
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
         '''
-        cur.execute(insert_statement, (faculty_id, department_id, name, description, start, end, finished, type))
+        cur.execute(insert_statement, (faculty_id, department_id, name, description, start, end, finished, type,))
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -187,7 +187,7 @@ def create_list(election_id, name, type, users_ids):
             VALUES(%s, %s, %s)
             RETURNING id
         '''
-        cur.execute(insert_statement, (election_id, name, type))
+        cur.execute(insert_statement, (election_id, name, type,))
 
         # get list id and create new insert statement
         list_id = cur.fetchone()[0]
@@ -224,7 +224,7 @@ def create_voting_table(election_id, department_id):
             INSERT INTO mesa_de_voto(eleicao_id, departamento_id)
             VALUES(%s, %s)
         '''
-        cur.execute(insert_statement, (election_id, department_id))
+        cur.execute(insert_statement, (election_id, department_id,))
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -251,7 +251,7 @@ def create_voting_terminal(voting_table_id):
             INSERT INTO terminal_de_voto(mesa_de_voto_id)
             VALUES(%s)
         '''
-        cur.execute(insert_statement, (voting_table_id))
+        cur.execute(insert_statement, (voting_table_id,))
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -278,7 +278,34 @@ def create_vote(user_id, election_id, department_id):
             INSERT INTO voto(pessoa_id, eleicao_id, departamento_id)
             VALUES(%s, %s, %s)
         '''
-        cur.execute(insert_statement, (user_id, election_id, department_id))
+        cur.execute(insert_statement, (user_id, election_id, department_id,))
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    # close communication with the PostgreSQL database server
+    cur.close()
+    # commit the changes
+    conn.commit()
+
+
+"""
+Create new list results
+"""
+def create_list_results(list_id, number_of_votes, percentage_of_votes):
+    conn = None
+    try:
+        # connect to database and create cursor to execute commands in database session
+        conn_params = "host='localhost' dbname='ivotas' user='Machado' password=''"
+        conn = psycopg2.connect(conn_params)
+        cur = conn.cursor()
+
+        # insert list results
+        insert_statement = '''
+            INSERT INTO resultados_lista(lista_id, numero_votos, percentagem_votos)
+            VALUES(%s, %s, %s)
+        '''
+        cur.execute(insert_statement, (list_id, number_of_votes, percentage_of_votes,))
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
