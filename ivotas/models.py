@@ -375,3 +375,69 @@ def search_faculty(name):
     finally:
         close_db()
         return faculties
+
+
+"""
+Get all departments
+"""
+def get_departments():
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        # get all departments
+        search_statement = '''SELECT * FROM departamento'''
+        cur.execute(search_statement)
+        departments = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return departments
+
+"""
+Get departments belonging to a faculty
+"""
+def get_departments_of_faculty(faculty_id):
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        # get all departments
+        search_statement = '''SELECT * FROM departamento'''
+        cur.execute(search_statement)
+        departments = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return departments
+
+"""
+Search faculties by name
+"""
+def search_department(name):
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT * FROM departamento
+            WHERE nome=%s
+        '''
+        cur.execute(search_statement, (name,))
+        departments = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return departments
