@@ -325,3 +325,53 @@ def create_results(election_id, list_results_id):
         print(error)
     finally:
         close_db()
+
+
+########################
+### Query functions ###
+########################
+
+"""
+Get all faculties
+"""
+def get_faculties():
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        # get all faculties
+        search_statement = '''SELECT * FROM faculdade'''
+        cur.execute(search_statement)
+        faculties = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return faculties
+
+
+"""
+Search faculties by name
+"""
+def search_faculty(name):
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT * FROM faculdade
+            WHERE nome=%s
+        '''
+        cur.execute(search_statement, (name,))
+        faculties = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return faculties
