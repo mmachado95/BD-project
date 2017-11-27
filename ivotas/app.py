@@ -22,8 +22,10 @@ def hello():
     models.create_results(1, 1)
     print(models.search_faculty())
     print(models.search_department())
+    print(models.search_user())
     print(models.search_faculty(nome='FCTUC'))
     print(models.search_department(nome='Economia'))
+    print(models.search_user(nome='Miguel'))
     return 'Hello World!'
 
 

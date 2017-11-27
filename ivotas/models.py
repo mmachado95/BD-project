@@ -372,3 +372,24 @@ def search_department(**kwargs):
     finally:
         close_db()
         return departments
+
+"""
+Search user
+"""
+def search_user(**kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get all users
+        search_statement = get_search_statement('pessoa', kwargs)
+        cur.execute(search_statement)
+        users = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return users
