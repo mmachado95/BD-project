@@ -20,17 +20,10 @@ def hello():
     models.create_vote(1, 2, 1)
     models.create_list_results(1, 23, 50)
     models.create_results(1, 1)
-    print(models.search_faculty())
-    print(models.search_department())
-    print(models.search_user())
-    print(models.search_faculty(nome='FCTUC'))
-    print(models.search_department(nome='Economia'))
-    print(models.search_user(nome='Miguel'))
-
     models.update_department('1', nome='total change')
-    print(models.search_faculty(id='1'))
-    print(models.search_department(id='1'))
-    print(models.search_department(id='2'))
+    models.delete_data('faculdade', 1)
+    models.delete_data('departamento', 3)
+    models.delete_data('pessoa', 7)
     return 'Hello World!'
 
 
