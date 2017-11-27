@@ -3,15 +3,6 @@ from flask import g
 
 
 """
-Parse sql file for commands to run
-"""
-def get_commands(filename):
-    f = open(filename, 'r')
-    commands = f.read()
-    return commands.split(';')
-
-
-"""
 Connect to database
 """
 def connect_db(_host, _dbname, _user, _password):
@@ -40,3 +31,31 @@ def close_db():
     db = getattr(g, '_database', None)
     if db is not None:
         db.close
+
+
+"""
+Parse sql file for commands to run
+"""
+def get_commands(filename):
+    f = open(filename, 'r')
+    commands = f.read()
+    return commands.split(';')
+
+
+"""
+Takes keyword args received by functions and returns a search string ready to be executed
+"""
+def get_search_statement(table, args):
+    search_statement = 'SELECT * FROM ' + table
+
+    # If no search arguments where received
+    if args != {}:
+        search_statement += ' WHERE '
+    else:
+        return search_statement
+
+    # Query options
+    for key, value in args.items():
+        search_statement += key + '=' + "'" + value + "'"
+
+    return search_statement
