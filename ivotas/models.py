@@ -1,5 +1,5 @@
 import psycopg2
-from ivotas.utils import get_db, close_db, get_commands, get_search_statement
+from ivotas.utils import get_db, close_db, get_commands, get_search_statement, get_update_statement
 
 
 """
@@ -567,3 +567,123 @@ def search_results(**kwargs):
     finally:
         close_db()
         return results
+
+
+########################
+### Update functions ###
+########################
+
+
+"""
+Update Faculty
+"""
+def update_faculty(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update faculty
+        update_statement = get_update_statement('faculdade', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+
+
+"""
+Update department
+"""
+def update_department(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update department
+        update_statement = get_update_statement('departamento', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+
+
+"""
+Update user
+"""
+def update_user(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update user
+        update_statement = get_update_statement('pessoa', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+
+
+"""
+Update election
+"""
+def update_election(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update election
+        update_statement = get_update_statement('eleicao', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+
+
+"""
+Update list
+"""
+def update_list(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update list
+        update_statement = get_update_statement('lista', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
