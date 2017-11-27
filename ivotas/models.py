@@ -687,3 +687,30 @@ def update_list(id_to_update, **kwargs):
         print(error)
     finally:
         close_db()
+
+
+########################
+### Delete functions ###
+########################
+
+"""
+General delete function
+"""
+def delete_data(table, id_to_delete):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # delete faculty
+        delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
+        cur.execute(delete_statement, (id_to_delete,))
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
