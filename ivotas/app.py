@@ -26,6 +26,11 @@ def hello():
     print(models.search_faculty(nome='FCTUC'))
     print(models.search_department(nome='Economia'))
     print(models.search_user(nome='Miguel'))
+
+    models.update_department('1', nome='total change')
+    print(models.search_faculty(id='1'))
+    print(models.search_department(id='1'))
+    print(models.search_department(id='2'))
     return 'Hello World!'
 
 
