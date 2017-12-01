@@ -1,25 +1,34 @@
-INSERT INTO faculdade (nome)
+INSERT INTO unidade_organica (nome)
 VALUES
-  ('FCTUC'),
-  ('FEUC');
+('FCTUC'),
+('FEUC'),
+('Engenharia Informatica'),
+('Engenharia Mecanica'),
+('Economia'),
+('Gestao');
 
-INSERT INTO departamento (faculdade_id, nome)
+INSERT INTO faculdade (unidade_organica_id)
 VALUES
-  ((SELECT id from faculdade WHERE nome='FCTUC'), 'Engenharia Informatica'),
-  ((SELECT id from faculdade WHERE nome='FCTUC'), 'Engenharia Mecanica'),
-  ((SELECT id from faculdade WHERE nome='FEUC'), 'Economia'),
-  ((SELECT id from faculdade WHERE nome='FEUC'), 'Gestao');
+(1),
+(2);
 
-INSERT INTO pessoa (departamento_id, nome, password, contacto, morada, cc, data_validade, tipo)
+INSERT INTO departamento (unidade_organica_id, faculdade_id)
 VALUES
-  ((SELECT id from departamento WHERE nome='Engenharia Informatica'), 'Teresa', '123', '9140975121', 'RUA A', '11111111', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Engenharia Informatica'), 'Miguel', '123', '9140975122', 'RUA B', '11111112', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Engenharia Mecanica'), 'Pedro', '123', '9140975123', 'RUA C', '11111113', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Engenharia Mecanica'), 'Maria', '123', '9140975124', 'RUA D', '11111114', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Economia'), 'Paula', '123', '9140975125', 'RUA E', '11111115', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Economia'), 'Diogo', '123', '9140975126', 'RUA F', '11111116', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Gestao'), 'Andre', '123', '9140975127', 'RUA G', '11111117', '2017-12-25', 1),
-  ((SELECT id from departamento WHERE nome='Gestao'), 'Jose', '123', '9140975128', 'RUA H', '11111118', '2017-12-25', 1);
+(3, 1),
+(4, 1),
+(5, 2),
+(6, 2);
+
+INSERT INTO pessoa (unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo)
+VALUES
+  (3, 'Teresa', '123', '9140975121', 'RUA A', '11111111', '2017-12-25', 1),
+  (3, 'Miguel', '123', '9140975122', 'RUA B', '11111112', '2017-12-25', 1),
+  (4, 'Pedro', '123', '9140975123', 'RUA C', '11111113', '2017-12-25', 1),
+  (4, 'Maria', '123', '9140975124', 'RUA D', '11111114', '2017-12-25', 1),
+  (5, 'Paula', '123', '9140975125', 'RUA E', '11111115', '2017-12-25', 1),
+  (5, 'Diogo', '123', '9140975126', 'RUA F', '11111116', '2017-12-25', 1),
+  (6, 'Andre', '123', '9140975127', 'RUA G', '11111117', '2017-12-25', 1),
+  (6, 'Jose', '123', '9140975128', 'RUA H', '11111118', '2017-12-25', 1);
 
 INSERT INTO eleicao(nome, descricao, inicio, fim, acabou, tipo)
 VALUES
@@ -36,7 +45,7 @@ VALUES
   (1, 3),
   (2, 2);
 
-INSERT INTO mesa_de_voto(eleicao_id, departamento_id)
+INSERT INTO mesa_de_voto(eleicao_id, unidade_organica_id)
 VALUES
   (1, 1);
 
