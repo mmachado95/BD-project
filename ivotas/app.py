@@ -23,8 +23,10 @@ def hello():
     models.create_voting_terminal(2)
     models.create_vote(1, 1)
     models.update_organic_unit('1', nome='total change')
-    return render_template('main.html')
 
+    users = models.search_user()
+
+    return render_template('main.html', users=users)
 
 
 if __name__ == '__main__':

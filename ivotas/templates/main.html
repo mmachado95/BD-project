@@ -26,7 +26,12 @@
       <a class="button is-info is-large">Gerir Mesa de Voto</a> <br> <br>
       <a class="button is-info is-large">Alterar propriedades Eleição</a> <br> <br>
       <a class="button is-info is-large">Saber local onde votou cada eleitor</a> <br> <br>
-      <a class="button is-info is-large">Consultar detalhes de Elieções passadas</a>
+      <a class="button is-info is-large">Consultar detalhes de Elieções passadas</a> <br> <br>
+
+      {% for user in users %}
+        <br>
+        <h3>User: {{ user }}</h3>
+      {% endfor %}
 
     </div>
 
