@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from ivotas import models
 
 
@@ -23,7 +23,8 @@ def hello():
     models.create_voting_terminal(2)
     models.create_vote(1, 1)
     models.update_organic_unit('1', nome='total change')
-    return 'Hello World!'
+    return render_template('main.html')
+
 
 
 if __name__ == '__main__':
