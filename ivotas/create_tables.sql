@@ -57,6 +57,7 @@ CREATE TABLE eleicao (
     fim timestamp NOT NULL,
     acabou boolean NOT NULL,
     tipo smallint NOT NULL,
+    total_votos integer DEFAULT 0,
     votos_brancos integer DEFAULT 0,
     percentagem_brancos real DEFAULT 0.0,
     votos_nulos integer DEFAULT 0,
@@ -67,6 +68,7 @@ CREATE TABLE lista (
     eleicao_id integer NOT NULL,
     nome varchar(100) NOT NULL,
     tipo smallint NOT NULL,
+    numero_votos integer DEFAULT 0,
     FOREIGN KEY (eleicao_id)
         REFERENCES eleicao (id)
         ON UPDATE CASCADE ON DELETE CASCADE
