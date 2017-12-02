@@ -1,6 +1,11 @@
 import psycopg2
 from flask import g
 
+"""
+Future documentation purposes:
+->http://flask.pocoo.org/docs/0.12/tutorial/dbcon/
+"""
+
 
 """
 Connect to database
