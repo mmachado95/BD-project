@@ -1,41 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hello Bulma!</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css">
-  </head>
-  <body>
-  <section class="section">
-    <div class="container">
+{% extends "base.html" %}
 
-      <h1 class="title">
-        iVotas
-      </h1>
-      <p class="subtitle">
-        BD Project
-      </p>
-
-      <a class="button is-info is-large">Registar Pessoas</a> <br> <br>
-      <a class="button is-info is-large">Gerir Departamento</a> <br> <br>
-      <a class="button is-info is-large">Gerir Faculdade</a> <br> <br>
-      <a class="button is-info is-large">Criação Eleição</a> <br> <br>
-      <a class="button is-info is-large">Gerir Lista de Candidatos</a> <br> <br>
-      <a class="button is-info is-large">Gerir Mesa de Voto</a> <br> <br>
-      <a class="button is-info is-large">Alterar propriedades Eleição</a> <br> <br>
-      <a class="button is-info is-large">Saber local onde votou cada eleitor</a> <br> <br>
-      <a class="button is-info is-large">Consultar detalhes de Elieções passadas</a> <br> <br>
-
-      {% for user in users %}
-        <br>
-        <h3>User: {{ user }}</h3>
-      {% endfor %}
-
-    </div>
-
-
-  </section>
-  </body>
-</html>
+{% block content %}
+  <div class="container">
+        <a class="button is-info is-large">Votar</a> <br> <br>
+  </div>
+{% endblock %}
