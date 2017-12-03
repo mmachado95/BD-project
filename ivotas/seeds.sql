@@ -34,10 +34,10 @@ INSERT INTO eleicao(nome, descricao, inicio, fim, acabou, tipo)
 VALUES
   ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', false, 2);
 
-INSERT INTO lista(eleicao_id, nome, tipo)
+INSERT INTO lista(eleicao_id, nome)
 VALUES
-  (1, 'LISTA A', 1),
-  (1, 'LISTA B', 1);
+  (1, 'LISTA A'),
+  (1, 'LISTA B');
 
 INSERT INTO lista_de_candidatos(lista_id, pessoa_id)
 VALUES

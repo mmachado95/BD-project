@@ -173,18 +173,18 @@ def create_election(name, description, start, end, finished, type):
 """
 Create new list for election
 """
-def create_list(election_id, name, type, users_ids):
+def create_list(election_id, name, users_ids):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert list
         insert_statement = '''
-            INSERT INTO lista(eleicao_id, nome, tipo)
-            VALUES(%s, %s, %s)
+            INSERT INTO lista(eleicao_id, nome)
+            VALUES(%s, %s)
             RETURNING id
         '''
-        cur.execute(insert_statement, (election_id, name, type,))
+        cur.execute(insert_statement, (election_id, name,))
 
         # get list id and create new insert statement
         list_id = cur.fetchone()[0]

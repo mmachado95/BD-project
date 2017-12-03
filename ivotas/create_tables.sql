@@ -31,6 +31,9 @@ CREATE TABLE departamento (
     REFERENCES unidade_organica (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+-- 1 - professor
+-- 2 - funcionario
+-- 3 - aluno
 CREATE TABLE pessoa (
     id SERIAL PRIMARY KEY,
     unidade_organica_id integer NOT NULL,
@@ -67,7 +70,6 @@ CREATE TABLE lista (
     id SERIAL PRIMARY KEY,
     eleicao_id integer NOT NULL,
     nome varchar(100) NOT NULL,
-    tipo smallint NOT NULL,
     numero_votos integer DEFAULT 0,
     FOREIGN KEY (eleicao_id)
         REFERENCES eleicao (id)
