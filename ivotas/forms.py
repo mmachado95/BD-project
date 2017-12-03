@@ -31,10 +31,30 @@ class CreateDepartmentForm(Form):
     name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
 
 
-class ChangeDepartmentForm(Form):
+class ChooseDepartmentForm(Form):
     department = SelectField(label='Departamento', coerce=int)
-    new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=1, max=100)])
+
+
+class ChangeDepartmentForm(Form):
+    faculty = SelectField(label='Faculdade', coerce=int)
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
 
 
 class DeleteDepartmentForm(Form):
     department = SelectField(label='Departamento', coerce=int)
+
+
+class CreateCandidateListForm(Form):
+    name = StringField('Nome', [validators.required(), validators.Length(min=4, max=100)])
+    election = SelectField(label='Eleição', coerce=int)
+
+
+class ChangeCandidateListForm(Form):
+    old_name = SelectField(label='Nome antigo', coerce=int)
+    new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=4, max=100)])
+    old_election = SelectField(label='Eleicao antiga', coerce=int)
+    new_election = StringField('Eleicao nova', [validators.required(), validators.Length(min=4, max=100)])
+
+
+class DeleteCandidateListForm(Form):
+    list = SelectField(label='Lista de candidatos', coerce=int)

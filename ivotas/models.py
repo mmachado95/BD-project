@@ -354,7 +354,7 @@ def search_organic_unit(**kwargs):
         # get organic units
         search_statement = get_search_statement('unidade_organica', kwargs)
         cur.execute(search_statement)
-        faculties = cur.fetchall()
+        organic_units = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
@@ -362,7 +362,7 @@ def search_organic_unit(**kwargs):
         print(error)
     finally:
         close_db()
-        return faculties
+        return organic_units
 
 
 """
@@ -552,6 +552,29 @@ def update_organic_unit(id_to_update, **kwargs):
 
         # update faculty
         update_statement = get_update_statement('unidade_organica', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+
+
+"""
+Update Department
+"""
+def update_department(id_to_update, **kwargs):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update faculty
+        update_statement = get_update_statement('departamento', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change

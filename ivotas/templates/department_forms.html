@@ -14,7 +14,16 @@
     <form method="post">
       <dl>
         {{ render_field(form.department) }}
-        {{ render_field(form.new_name) }}
+      </dl>
+      <p><input type="submit" value="Change">
+    </form>
+  {% elif option == 3 %}
+    <form method="post">
+      <dl>
+        <p>{{ current_faculty }}</p>
+        {{ render_field(form.faculty) }}
+        <p>{{ current_name }}</p>
+        {{ render_field(form.name) }}
       </dl>
       <p><input type="submit" value="Change">
     </form>

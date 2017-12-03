@@ -11,7 +11,6 @@ def index():
     models.create_tables()
     models.seed_tables()
     organic_units = models.search_organic_unit()
-    print(organic_units)
 
     users = models.search_user()
 
@@ -102,20 +101,42 @@ def create_department():
         models.create_department(name, faculty_id)
         return redirect(url_for('admin'))
 
-    return render_template('department_forms.html', form=form, option=1)
+    return render_template('department_forms.html', form=form, option=1, current_faculty=None, current_name=None)
 
 
-@app.route('/manage_department/change', methods=['GET', 'POST'])
-def change_department():
-    form = forms.ChangeDepartmentForm(request.form)
+@app.route('/manage_department/choose', methods=['GET', 'POST'])
+def choose_department():
+    form = forms.ChooseDepartmentForm(request.form)
     form.department.choices = models.get_departments()
 
     if request.method == 'POST' and form.validate():
         id_to_update = form.department.data
-        new_name = form.new_name.data
-        models.update_organic_unit(id_to_update, nome=new_name)
+        return redirect(url_for('change_department', department_id=id_to_update))
+    return render_template('department_forms.html', form=form, option=2, current_faculty=None, current_name=None)
+
+
+@app.route('/manage_department/change/<int:department_id>', methods=['GET', 'POST'])
+def change_department(department_id):
+    # TODO too much queries, optimize this
+    # Selects with name
+    # Really needs optimization
+    department = models.search_department(unidade_organica_id=str(department_id))[0]
+    organic_unit_id = str(department[0])
+    faculty_id = str(department[1])
+    department_name = models.search_organic_unit(id=organic_unit_id)[0][1]
+    faculty = models.search_organic_unit(id=faculty_id)[0][1]
+    faculties = models.get_faculties()
+
+    form = forms.ChangeDepartmentForm(request.form)
+    form.faculty.choices = faculties
+
+    if request.method == 'POST' and form.validate():
+        faculty_id = form.faculty.data
+        name = form.name.data
+        models.update_organic_unit(str(department_id), nome=name)
+        models.update_department(str(department_id), faculdade_id=str(faculty_id))
         return redirect(url_for('admin'))
-    return render_template('department_forms.html', form=form, option=2)
+    return render_template('department_forms.html', form=form, option=3, current_faculty=faculty, current_name=department_name)
 
 
 @app.route('/manage_department/delete', methods=['GET', 'POST'])
@@ -127,7 +148,7 @@ def delete_department():
         id_to_delete = form.department.data
         models.delete_data('unidade_organica', id_to_delete)
         return redirect(url_for('admin'))
-    return render_template('department_forms.html', form=form, option=3)
+    return render_template('department_forms.html', form=form, option=3, current_faculty=None, current_name=None)
 
 
 if __name__ == '__main__':

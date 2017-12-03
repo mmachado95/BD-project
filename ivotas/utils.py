@@ -73,5 +73,8 @@ def get_update_statement(table, id_to_update, args):
     for key, value in args.items():
         update_statement += key + '=' + "'" + value + "'"
 
-    update_statement += ' WHERE id=' + "'" + id_to_update + "'"
+    if table=='faculdade' or table=='departamento':
+        update_statement += ' WHERE unidade_organica_id=' + "'" + id_to_update + "'"
+    else:
+        update_statement += ' WHERE id=' + "'" + id_to_update + "'"
     return update_statement
