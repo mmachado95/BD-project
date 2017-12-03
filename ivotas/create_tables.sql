@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS unidade_organica;
 
 CREATE TABLE unidade_organica (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(200) NOT NULL
+    nome VARCHAR(100) NOT NULL
 );
 CREATE TABLE faculdade (
     unidade_organica_id integer NOT NULL,

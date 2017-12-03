@@ -68,6 +68,7 @@ def get_search_statement(table, args):
 
 def get_update_statement(table, id_to_update, args):
     update_statement = 'UPDATE ' + table + ' SET '
+    id_to_update = str(id_to_update)
 
     for key, value in args.items():
         update_statement += key + '=' + "'" + value + "'"

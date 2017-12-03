@@ -62,33 +62,15 @@ def seed_tables():
 """
 Create new faculty
 """
-def create_organic_unit(name):
+def create_faculty(name):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
-        # insert faculty in table
-        insert_statement = '''INSERT INTO unidade_organica(nome) VALUES(%s)'''
+        # create organic_unit
+        insert_statement = '''INSERT INTO unidade_organica(nome) VALUES(%s) RETURNING id'''
         cur.execute(insert_statement, (name,))
-
-        # commit the changes
-        get_db('ivotas').commit()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        close_db()
-
-
-"""
-Create new faculty
-"""
-def create_faculty(organic_unit_id):
-    try:
-        # connect to database and create cursor to execute commands in database session
-        cur = get_db('ivotas').cursor()
+        organic_unit_id = cur.fetchone()[0]
 
         # insert faculty in table
         insert_statement = '''INSERT INTO faculdade(unidade_organica_id) VALUES(%s)'''
@@ -108,10 +90,15 @@ def create_faculty(organic_unit_id):
 """
 Create new department
 """
-def create_department(organic_unit_id, faculty_id):
+def create_department(name, faculty_id):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
+
+        # create organic_unit
+        insert_statement = '''INSERT INTO unidade_organica(nome) VALUES(%s) RETURNING id'''
+        cur.execute(insert_statement, (name,))
+        organic_unit_id = cur.fetchone()[0]
 
         # insert department in table
         insert_statement = '''
@@ -303,15 +290,19 @@ def create_vote(user_id, voting_table_id):
 ########################
 
 """
-Search organic units
+Get faculties
 """
-def search_organic_unit(**kwargs):
+def get_faculties():
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get organic units
-        search_statement = get_search_statement('unidade_organica', kwargs)
+        # get faculties
+        search_statement = '''
+            SELECT id, nome
+            FROM unidade_organica, faculdade
+            WHERE id=unidade_organica_id
+        '''
         cur.execute(search_statement)
         faculties = cur.fetchall()
 
@@ -324,16 +315,18 @@ def search_organic_unit(**kwargs):
         return faculties
 
 
+###################################################################3
+
 """
-Search faculties
+Search organic units
 """
-def search_faculty(**kwargs):
+def search_organic_unit(**kwargs):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get faculties
-        search_statement = get_search_statement('faculdade', kwargs)
+        # get organic units
+        search_statement = get_search_statement('unidade_organica', kwargs)
         cur.execute(search_statement)
         faculties = cur.fetchall()
 
@@ -627,7 +620,7 @@ def delete_data(table, id_to_delete):
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # delete faculty
+        # delete
         delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
         cur.execute(delete_statement, (id_to_delete,))
 

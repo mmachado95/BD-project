@@ -11,3 +11,16 @@ class RegisterUserForm(Form):
     cc = StringField('cc', [validators.required(), validators.Length(min=4, max=10)])
     end_date = DateField('Data de Validade', [validators.required()], format='%Y-%m-%d')
     type = SelectField(label='Tipo', choices=[(1, 'Professor'), (2, 'Funcionário'), (3, 'Estudante')], coerce=int)
+
+
+class CreateFacultyForm(Form):
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+
+
+class ChangeFacultyForm(Form):
+    faculties = SelectField(label='Faculdade', coerce=int)
+    new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=1, max=100)])
+
+
+class DeleteFacultyForm(Form):
+    faculties = SelectField(label='Unidade Orgânica', coerce=int)
