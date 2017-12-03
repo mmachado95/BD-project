@@ -46,7 +46,7 @@ def register_person():
 
 @app.route('/manage_faculty', methods=['GET', 'POST'])
 def manage_faculty():
-    return render_template('manage_faculty.html')
+    return render_template('manage_organic_unit.html', option='faculty')
 
 
 @app.route('/manage_faculty/create', methods=['GET', 'POST'])
@@ -64,10 +64,10 @@ def create_faculty():
 @app.route('/manage_faculty/change', methods=['GET', 'POST'])
 def change_faculty():
     form = forms.ChangeFacultyForm(request.form)
-    form.faculties.choices = models.get_faculties()
+    form.faculty.choices = models.get_faculties()
 
     if request.method == 'POST' and form.validate():
-        id_to_update = form.faculties.data
+        id_to_update = form.faculty.data
         new_name = form.new_name.data
         models.update_organic_unit(id_to_update, nome=new_name)
         return redirect(url_for('admin'))
@@ -77,13 +77,57 @@ def change_faculty():
 @app.route('/manage_faculty/delete', methods=['GET', 'POST'])
 def delete_faculty():
     form = forms.DeleteFacultyForm(request.form)
-    form.faculties.choices = models.get_faculties()
+    form.faculty.choices = models.get_faculties()
 
     if request.method == 'POST' and form.validate():
-        id_to_delete = form.faculties.data
+        id_to_delete = form.faculty.data
         models.delete_data('unidade_organica', id_to_delete)
         return redirect(url_for('admin'))
     return render_template('faculty_forms.html', form=form, option=3)
+
+
+@app.route('/manage_department', methods=['GET', 'POST'])
+def manage_department():
+    return render_template('manage_organic_unit.html', option='department')
+
+
+@app.route('/manage_department/create', methods=['GET', 'POST'])
+def create_department():
+    form = forms.CreateDepartmentForm(request.form)
+    form.faculty.choices = models.get_faculties()
+
+    if request.method == 'POST' and form.validate():
+        faculty_id = form.faculty.data
+        name = form.name.data
+        models.create_department(name, faculty_id)
+        return redirect(url_for('admin'))
+
+    return render_template('department_forms.html', form=form, option=1)
+
+
+@app.route('/manage_department/change', methods=['GET', 'POST'])
+def change_department():
+    form = forms.ChangeDepartmentForm(request.form)
+    form.department.choices = models.get_departments()
+
+    if request.method == 'POST' and form.validate():
+        id_to_update = form.department.data
+        new_name = form.new_name.data
+        models.update_organic_unit(id_to_update, nome=new_name)
+        return redirect(url_for('admin'))
+    return render_template('department_forms.html', form=form, option=2)
+
+
+@app.route('/manage_department/delete', methods=['GET', 'POST'])
+def delete_department():
+    form = forms.DeleteDepartmentForm(request.form)
+    form.department.choices = models.get_departments()
+
+    if request.method == 'POST' and form.validate():
+        id_to_delete = form.department.data
+        models.delete_data('unidade_organica', id_to_delete)
+        return redirect(url_for('admin'))
+    return render_template('department_forms.html', form=form, option=3)
 
 
 if __name__ == '__main__':

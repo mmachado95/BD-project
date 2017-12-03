@@ -315,6 +315,32 @@ def get_faculties():
         return faculties
 
 
+"""
+Get departments
+"""
+def get_departments():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get departments
+        search_statement = '''
+            SELECT id, nome
+            FROM unidade_organica, departamento
+            WHERE id=unidade_organica_id
+        '''
+        cur.execute(search_statement)
+        departments = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        close_db()
+        return departments
+
+
 ###################################################################3
 
 """

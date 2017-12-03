@@ -18,9 +18,23 @@ class CreateFacultyForm(Form):
 
 
 class ChangeFacultyForm(Form):
-    faculties = SelectField(label='Faculdade', coerce=int)
+    faculty = SelectField(label='Faculdade', coerce=int)
     new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=1, max=100)])
 
 
 class DeleteFacultyForm(Form):
-    faculties = SelectField(label='Unidade Orgânica', coerce=int)
+    faculty = SelectField(label='Faculdade', coerce=int)
+
+
+class CreateDepartmentForm(Form):
+    faculty = SelectField(label='Faculdade', coerce=int)
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+
+
+class ChangeDepartmentForm(Form):
+    department = SelectField(label='Departamento', coerce=int)
+    new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=1, max=100)])
+
+
+class DeleteDepartmentForm(Form):
+    department = SelectField(label='Departamento', coerce=int)
