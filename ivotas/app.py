@@ -148,7 +148,7 @@ def delete_department():
         id_to_delete = form.department.data
         models.delete_data('unidade_organica', id_to_delete)
         return redirect(url_for('admin'))
-    return render_template('department_forms.html', form=form, option=3, current_faculty=None, current_name=None)
+    return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
 
 
 if __name__ == '__main__':
