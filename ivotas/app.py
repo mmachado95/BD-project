@@ -210,8 +210,8 @@ def delete_voting_table():
     form.voting_table.choices = models.get_voting_tables(True)
 
     if request.method == 'POST' and form.validate():
-        id_to_delete = form.voting_table.data
-        models.delete_data('mesa_de_voto', id_to_delete)
+        voting_table_id = form.voting_table.data
+        models.delete_data('mesa_de_voto', voting_table_id)
         return redirect(url_for('admin'))
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 

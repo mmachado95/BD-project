@@ -455,7 +455,7 @@ def search_department(department_id):
 """
 Search voting table based on id
 """
-def search_voting_table(voting_table_id, names):
+def search_voting_table(voting_table_id, names, election_date):
     voting_table_id = str(voting_table_id)
     try:
         # connect to database
@@ -467,6 +467,12 @@ def search_voting_table(voting_table_id, names):
                 SELECT mv.id, e.nome "Eleicao", uo.nome "Unidade Organica"
                 FROM mesa_de_voto mv, eleicao e, unidade_organica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and mv.id=%s
+            '''
+        elif election_date:
+            search_statement = '''
+                SELECT inicio, fim
+                FROM mesa_de_voto mv, eleicao e
+                WHERE mv.eleicao_id=e.id and e.id=%s
             '''
         else:
             search_statement = '''
