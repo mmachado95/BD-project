@@ -216,5 +216,25 @@ def delete_voting_table():
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
 
+@app.route('/election/create', methods=['GET', 'POST'])
+def create_election():
+    form = forms.CreateElectionForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        description = form.description.data
+
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+        if start_date > end_date:
+            return render_template('create_election.html', form=form, error='Datas inválidas')
+
+        type = form.type.data
+
+        models.create_election(name, description, start_date, end_date, type)
+        return redirect(url_for('admin'))
+    return render_template('create_election.html', form=form, error=None)
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

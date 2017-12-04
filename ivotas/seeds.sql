@@ -30,7 +30,7 @@ VALUES
   (6, 'Andre', '123', '9140975127', 'RUA G', '11111117', '2017-12-25', 1),
   (6, 'Jose', '123', '9140975128', 'RUA H', '11111118', '2017-12-25', 1);
 
-INSERT INTO eleicao(nome, descricao, inicio, fim, acabou, tipo)
+INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
 VALUES
   ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', 2);
 

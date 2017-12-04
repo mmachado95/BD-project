@@ -145,7 +145,7 @@ def create_election(name, description, start, finished, type):
         # insert election in table
         insert_statement = '''
             INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
-            VALUES(%s, %s, %s, %s, %s, %s)
+            VALUES(%s, %s, %s, %s, %s)
         '''
         cur.execute(insert_statement, (name, description, start, finished, type,))
 
@@ -399,6 +399,36 @@ def get_voting_tables(form_friendly):
         print(error)
     finally:
         return elections
+
+
+"""
+Get Lists
+"""
+def get_lists(form_friendly, create_election):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get lists
+        if form_friendly:
+            search_statement = '''
+                SELECT id, nome
+                FROM lista
+            '''
+        else:
+            search_statement = '''
+                SELECT *
+                FROM lista
+            '''
+        cur.execute(search_statement)
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
 
 
 """
