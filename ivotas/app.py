@@ -191,9 +191,9 @@ def change_voting_table(voting_table_id):
     form.election.choices = models.get_elections(True)
     form.organic_unit.choices = models.get_organic_units()
 
-    voting_table = models.search_voting_table(voting_table_id, True)
-    election = voting_table[1]
-    organic_unit = voting_table[2]
+    voting_table = models.search_voting_table(voting_table_id, True, False)
+    election = voting_table[0]
+    organic_unit = voting_table[1]
 
     if request.method == 'POST' and form.validate():
         election = form.election.data

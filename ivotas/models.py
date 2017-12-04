@@ -506,7 +506,7 @@ def search_voting_table(voting_table_id, names, election_date):
             '''
         else:
             search_statement = '''
-                SELECT *
+                SELECT eleicao_id, unidade_organica_id
                 FROM mesa_de_voto
                 WHERE id=%s
             '''
