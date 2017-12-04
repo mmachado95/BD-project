@@ -522,6 +522,32 @@ def search_voting_table(voting_table_id, names, election_date):
         return voting_table
 
 
+"""
+Search election by id
+"""
+def search_election(election_id):
+    election_id = str(election_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT nome, descricao, inicio, fim, tipo
+            FROM eleicao
+            WHERE id=%s
+        '''
+
+        cur.execute(search_statement, (election_id,))
+        election = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return election
+
+
 ########################
 ### Update functions ###
 ########################

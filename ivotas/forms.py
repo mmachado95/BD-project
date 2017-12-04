@@ -1,5 +1,5 @@
 from wtforms import Form, StringField, PasswordField, SelectField, SelectMultipleField, validators
-from wtforms.fields.html5 import DateField
+from wtforms.fields.html5 import DateField, DateTimeField
 
 
 class RegisterUserForm(Form):
@@ -64,10 +64,32 @@ class DeleteVotingTableForm(Form):
 
 
 class CreateElectionForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=4, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
     description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
-    start_date = DateField('Inicio', [validators.required()], format='%Y-%m-%d')
-    end_date = DateField('Fim', [validators.required()], format='%Y-%m-%d')
+    start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
+    end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
+    type = SelectField(
+        label='Voting Table',
+        choices=[
+            (1, 'Conselho Geral'),
+            (2, 'Nucleo de Estudantes'),
+            (3, 'Direção Faculdade'),
+            (4, 'Direção Departamento')
+        ],
+        coerce=int
+    )
+
+
+class ChooseElectionForm(Form):
+    election = SelectField(label='Election', coerce=int)
+
+
+
+class ChangeElectionForm(Form):
+    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
+    start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
+    end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     type = SelectField(
         label='Voting Table',
         choices=[

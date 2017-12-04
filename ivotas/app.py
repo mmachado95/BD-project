@@ -95,7 +95,6 @@ def delete_faculty():
 def manage_department():
     return render_template('manage_organic_unit.html', option='department')
 
-
 @app.route('/manage_department/create', methods=['GET', 'POST'])
 def create_department():
     form = forms.CreateDepartmentForm(request.form)
@@ -234,6 +233,45 @@ def create_election():
         models.create_election(name, description, start_date, end_date, type)
         return redirect(url_for('admin'))
     return render_template('create_election.html', form=form, error=None)
+
+
+@app.route('/election/choose', methods=['GET', 'POST'])
+def choose_election():
+    form = forms.ChooseElectionForm(request.form)
+    form.election.choices = models.get_elections(True)
+
+    if request.method == 'POST' and form.validate():
+        election = form.election.data
+        return redirect(url_for('change_election', election_id=election))
+    return render_template('choose_election.html', form=form)
+
+
+@app.route('/election/change/<int:election_id>', methods=['GET', 'POST'])
+def change_election(election_id):
+    form = forms.ChangeElectionForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        description = form.description.data
+
+        start_date = form.start_date.data
+        end_date = form.end_date.data
+        if start_date > end_date:
+            return render_template('change_election.html', form=form, error='Datas inválidas')
+
+        type = form.type.data
+
+        models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date), tipo=str(type))
+        return redirect(url_for('admin'))
+
+    election = models.search_election(election_id)
+    form.name.data = election[0]
+    form.description.data = election[1]
+    form.start_date.data = election[2]
+    form.end_date.data = election[3]
+    form.type.data = election[4]
+
+    return render_template('change_election.html', form=form, error=None)
 
 
 if __name__ == '__main__':
