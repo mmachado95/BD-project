@@ -1,5 +1,5 @@
 import psycopg2
-from ivotas.utils import get_db, close_db, get_commands, get_search_statement, get_update_statement
+from ivotas.utils import get_db, get_commands, get_search_statement, get_update_statement
 
 
 """
@@ -25,8 +25,6 @@ def create_tables():
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -51,8 +49,6 @@ def seed_tables():
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 #################################
@@ -83,8 +79,6 @@ def create_faculty(name):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -114,8 +108,6 @@ def create_department(name, faculty_id):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -140,8 +132,6 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -166,8 +156,6 @@ def create_election(name, description, start, end, finished, type):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -203,8 +191,6 @@ def create_list(election_id, name, users_ids):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -229,8 +215,6 @@ def create_voting_table(election_id, organic_unit_id):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -255,8 +239,6 @@ def create_voting_terminal(voting_table_id):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
@@ -281,13 +263,32 @@ def create_vote(user_id, voting_table_id):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 ########################
 ### Query functions ###
 ########################
+
+
+"""
+Get organic units
+"""
+def get_organic_units():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get organic units
+        search_statement = '''SELECT * FROM unidade_organica'''
+        cur.execute(search_statement)
+        organic_units = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return organic_units
 
 """
 Get faculties
@@ -311,7 +312,6 @@ def get_faculties():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
         return faculties
 
 
@@ -337,87 +337,28 @@ def get_departments():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
         return departments
 
 
-###################################################################3
-
 """
-Search organic units
+Get elections
 """
-def search_organic_unit(**kwargs):
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # get organic units
-        search_statement = get_search_statement('unidade_organica', kwargs)
-        cur.execute(search_statement)
-        organic_units = cur.fetchall()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        close_db()
-        return organic_units
-
-
-"""
-Search department
-"""
-def search_department(**kwargs):
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # get departments
-        search_statement = get_search_statement('departamento', kwargs)
-        cur.execute(search_statement)
-        departments = cur.fetchall()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        close_db()
-        return departments
-
-"""
-Search user
-"""
-def search_user(**kwargs):
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # get users
-        search_statement = get_search_statement('pessoa', kwargs)
-        cur.execute(search_statement)
-        users = cur.fetchall()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        close_db()
-        return users
-
-
-"""
-Search election
-"""
-def search_election(**kwargs):
+def get_elections(form_friendly):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
         # get elections
-        search_statement = get_search_statement('eleicao', kwargs)
+        if form_friendly:
+            search_statement = '''
+                SELECT id, nome
+                FROM eleicao
+            '''
+        else:
+            search_statement = '''
+                SELECT *
+                FROM eleicao
+            '''
         cur.execute(search_statement)
         elections = cur.fetchall()
 
@@ -426,115 +367,123 @@ def search_election(**kwargs):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
         return elections
 
+
 """
-Search list
+Get voting tables
 """
-def search_list(**kwargs):
+def get_voting_tables(form_friendly):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get lists
-        search_statement = get_search_statement('lista', kwargs)
+        # get voting talbles
+        if form_friendly:
+            search_statement = '''
+                SELECT mv.id, e.nome || ' ' || uo.nome
+                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id
+            '''
+        else:
+            search_statement = '''
+                SELECT *
+                FROM eleicao
+            '''
         cur.execute(search_statement)
-        lists = cur.fetchall()
+        elections = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
-        return lists
+        return elections
 
 
 """
-Search candidates list
+Search organic unit based on id
 """
-def search_candidates_list(**kwargs):
+def search_organic_unit(organic_unit_id):
+    organic_unit_id = str(organic_unit_id)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get candidates lists
-        search_statement = get_search_statement('lista_de_candidatos', kwargs)
-        cur.execute(search_statement)
-        candidates_lists = cur.fetchall()
+        # search organic unit
+        search_statement = '''
+            SELECT nome
+            FROM unidade_organica
+            WHERE id=%s
+        '''
+        cur.execute(search_statement, (organic_unit_id,))
+        organic_unit = cur.fetchone()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
-        return candidates_lists
+        return organic_unit
 
 """
-Search voting table
+Search department based on id
 """
-def search_voting_tables(**kwargs):
+def search_department(department_id):
+    department_id = str(department_id)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get voting tables
-        search_statement = get_search_statement('mesa_de_voto', kwargs)
-        cur.execute(search_statement)
-        voting_tables = cur.fetchall()
+        # search department
+        search_statement = '''
+            SELECT faculdade_id, nome
+            FROM unidade_organica, departamento
+            WHERE id=unidade_organica_id and id=%s
+        '''
+        cur.execute(search_statement, (department_id,))
+        department = cur.fetchone()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
-        return voting_tables
+        return department
+
 
 """
-Search voting terminal
+Search voting table based on id
 """
-def search_voting_terminals(**kwargs):
+def search_voting_table(voting_table_id, names):
+    voting_table_id = str(voting_table_id)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # get voting terminals
-        search_statement = get_search_statement('terminal_de_voto', kwargs)
-        cur.execute(search_statement)
-        voting_terminals = cur.fetchall()
+        # search voting_table
+        if names:
+            search_statement = '''
+                SELECT mv.id, e.nome "Eleicao", uo.nome "Unidade Organica"
+                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and mv.id=%s
+            '''
+        else:
+            search_statement = '''
+                SELECT *
+                FROM mesa_de_voto
+                WHERE id=%s
+            '''
+
+        cur.execute(search_statement, (voting_table_id,))
+        voting_table = cur.fetchone()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
-        close_db()
-        return voting_terminals
-
-
-"""
-Search vote
-"""
-def search_vote(**kwargs):
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # get votes
-        search_statement = get_search_statement('voto', kwargs)
-        cur.execute(search_statement)
-        votes = cur.fetchall()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        close_db()
-        return votes
+        return voting_table
 
 
 ########################
@@ -546,6 +495,7 @@ def search_vote(**kwargs):
 Update Organic Unit
 """
 def update_organic_unit(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -561,14 +511,13 @@ def update_organic_unit(id_to_update, **kwargs):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
 Update Department
 """
 def update_department(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -584,14 +533,13 @@ def update_department(id_to_update, **kwargs):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
 Update user
 """
 def update_user(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -607,14 +555,13 @@ def update_user(id_to_update, **kwargs):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
 Update election
 """
 def update_election(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -630,14 +577,13 @@ def update_election(id_to_update, **kwargs):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
 
 
 """
 Update list
 """
 def update_list(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -653,8 +599,28 @@ def update_list(id_to_update, **kwargs):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()
+
+
+"""
+Update voting table
+"""
+def update_voting_table(id_to_update, **kwargs):
+    id_to_update = str(id_to_update)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # update voting table
+        update_statement = get_update_statement('mesa_de_voto', id_to_update, kwargs)
+        cur.execute(update_statement)
+
+        # commit change
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
 
 ########################
@@ -680,5 +646,3 @@ def delete_data(table, id_to_delete):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    finally:
-        close_db()

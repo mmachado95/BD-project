@@ -26,6 +26,7 @@ class DeleteFacultyForm(Form):
     faculty = SelectField(label='Faculdade', coerce=int)
 
 
+# TODO refactor only needs one form
 class CreateDepartmentForm(Form):
     faculty = SelectField(label='Faculdade', coerce=int)
     name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
@@ -43,18 +44,20 @@ class ChangeDepartmentForm(Form):
 class DeleteDepartmentForm(Form):
     department = SelectField(label='Departamento', coerce=int)
 
-
-class CreateCandidateListForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=4, max=100)])
+# TODO refactor only needs one form
+class CreateVotingTableForm(Form):
     election = SelectField(label='Eleição', coerce=int)
+    organic_unit = SelectField(label='Unidade Orgânica', coerce=int)
 
 
-class ChangeCandidateListForm(Form):
-    old_name = SelectField(label='Nome antigo', coerce=int)
-    new_name = StringField('Nome Novo', [validators.required(), validators.Length(min=4, max=100)])
-    old_election = SelectField(label='Eleicao antiga', coerce=int)
-    new_election = StringField('Eleicao nova', [validators.required(), validators.Length(min=4, max=100)])
+class ChooseVotingTableForm(Form):
+    voting_table = SelectField(label='Mesa de voto', coerce=int)
 
 
-class DeleteCandidateListForm(Form):
-    list = SelectField(label='Lista de candidatos', coerce=int)
+class ChangeVotingTableForm(Form):
+    election = SelectField(label='Nova Eleicão', coerce=int)
+    organic_unit = SelectField(label='Nova Unidade Orgânica', coerce=int)
+
+
+class DeleteVotingTableForm(Form):
+    voting_table = SelectField(label='Voting Table', coerce=int)

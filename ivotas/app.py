@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, url_for
+from flask import Flask, request, redirect, render_template, url_for, g
 from ivotas import models
 from ivotas import forms
 
@@ -6,15 +6,21 @@ from ivotas import forms
 app = Flask(__name__)
 
 
+"""
+Safe close database connection
+"""
+@app.teardown_appcontext
+def close_db(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close
+
+
 @app.route("/")
 def index():
     models.create_tables()
     models.seed_tables()
-    organic_units = models.search_organic_unit()
-
-    users = models.search_user()
-
-    return render_template('main.html', users=users)
+    return render_template('main.html')
 
 
 @app.route('/admin')
@@ -25,7 +31,7 @@ def admin():
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
     form = forms.RegisterUserForm(request.form)
-    form.organic_unit.choices = models.search_organic_unit()
+    form.organic_unit.choices = models.get_organic_units()
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -117,14 +123,10 @@ def choose_department():
 
 @app.route('/manage_department/change/<int:department_id>', methods=['GET', 'POST'])
 def change_department(department_id):
-    # TODO too much queries, optimize this
-    # Selects with name
-    # Really needs optimization
-    department = models.search_department(unidade_organica_id=str(department_id))[0]
-    organic_unit_id = str(department[0])
-    faculty_id = str(department[1])
-    department_name = models.search_organic_unit(id=organic_unit_id)[0][1]
-    faculty = models.search_organic_unit(id=faculty_id)[0][1]
+    # TODO optimize this
+    department = models.search_department(department_id)
+    department_name = department[1]
+    faculty_name = models.search_organic_unit(department[0])
     faculties = models.get_faculties()
 
     form = forms.ChangeDepartmentForm(request.form)
@@ -133,10 +135,10 @@ def change_department(department_id):
     if request.method == 'POST' and form.validate():
         faculty_id = form.faculty.data
         name = form.name.data
-        models.update_organic_unit(str(department_id), nome=name)
-        models.update_department(str(department_id), faculdade_id=str(faculty_id))
+        models.update_organic_unit(department_id, nome=name)
+        models.update_department(department_id, faculdade_id=str(faculty_id))
         return redirect(url_for('admin'))
-    return render_template('department_forms.html', form=form, option=3, current_faculty=faculty, current_name=department_name)
+    return render_template('department_forms.html', form=form, option=3, current_faculty=faculty_name, current_name=department_name)
 
 
 @app.route('/manage_department/delete', methods=['GET', 'POST'])
@@ -149,6 +151,69 @@ def delete_department():
         models.delete_data('unidade_organica', id_to_delete)
         return redirect(url_for('admin'))
     return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
+
+
+@app.route('/manage_voting_table', methods=['GET', 'POST'])
+def manage_voting_table():
+    return render_template('manage_voting_table.html')
+
+
+@app.route('/manage_voting_table/create', methods=['GET', 'POST'])
+def create_voting_table():
+    form = forms.CreateVotingTableForm(request.form)
+    form.election.choices = models.get_elections(True)
+    form.organic_unit.choices = models.get_organic_units()
+
+    if request.method == 'POST' and form.validate():
+        election_id = form.election.data
+        organic_unit_id = form.organic_unit.data
+        models.create_voting_table(election_id, organic_unit_id)
+        return redirect(url_for('admin'))
+
+    return render_template('voting_table_forms.html', form=form, option=1, current_election=None, current_organic_unit=None)
+
+
+@app.route('/manage_voting_table/choose', methods=['GET', 'POST'])
+def choose_voting_table():
+    form = forms.ChooseVotingTableForm(request.form)
+    form.voting_table.choices = models.get_voting_tables(True)
+
+    if request.method == 'POST' and form.validate():
+        id_to_update = form.voting_table.data
+        return redirect(url_for('change_voting_table', voting_table_id=id_to_update))
+    return render_template('voting_table_forms.html', form=form, option=2, current_election=None, current_organic_unit=None)
+
+
+@app.route('/manage_voting_table/change/<int:voting_table_id>', methods=['GET', 'POST'])
+def change_voting_table(voting_table_id):
+    # TODO check if field has changed
+    form = forms.ChangeVotingTableForm(request.form)
+    form.election.choices = models.get_elections(True)
+    form.organic_unit.choices = models.get_organic_units()
+
+    voting_table = models.search_voting_table(voting_table_id, True)
+    election = voting_table[1]
+    organic_unit = voting_table[2]
+
+    if request.method == 'POST' and form.validate():
+        election = form.election.data
+        organic_unit = form.organic_unit.data
+        models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
+        return redirect(url_for('admin'))
+    return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
+
+
+# TODO Check if election is happening with this voting table
+@app.route('/manage_voting_table/delete', methods=['GET', 'POST'])
+def delete_voting_table():
+    form = forms.DeleteVotingTableForm(request.form)
+    form.voting_table.choices = models.get_voting_tables(True)
+
+    if request.method == 'POST' and form.validate():
+        id_to_delete = form.voting_table.data
+        models.delete_data('mesa_de_voto', id_to_delete)
+        return redirect(url_for('admin'))
+    return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
 
 if __name__ == '__main__':
