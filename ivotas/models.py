@@ -137,17 +137,17 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
 """
 Create new election
 """
-def create_election(name, description, start, end, finished, type):
+def create_election(name, description, start, finished, type):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert election in table
         insert_statement = '''
-            INSERT INTO eleicao(nome, descricao, inicio, fim, acabou, tipo)
+            INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
             VALUES(%s, %s, %s, %s, %s, %s)
         '''
-        cur.execute(insert_statement, (name, description, start, end, finished, type,))
+        cur.execute(insert_statement, (name, description, start, finished, type,))
 
         # commit the changes
         get_db('ivotas').commit()

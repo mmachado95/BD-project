@@ -58,7 +58,6 @@ CREATE TABLE eleicao (
     descricao VARCHAR(500) NOT NULL,
     inicio timestamp NOT NULL,
     fim timestamp NOT NULL,
-    acabou boolean NOT NULL,
     tipo smallint NOT NULL,
     total_votos integer DEFAULT 0,
     votos_brancos integer DEFAULT 0,

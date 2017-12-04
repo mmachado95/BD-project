@@ -32,7 +32,7 @@ VALUES
 
 INSERT INTO eleicao(nome, descricao, inicio, fim, acabou, tipo)
 VALUES
-  ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', false, 2);
+  ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', 2);
 
 INSERT INTO lista(eleicao_id, nome)
 VALUES
