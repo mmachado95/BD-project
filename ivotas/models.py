@@ -494,7 +494,7 @@ def search_voting_table(voting_table_id, names, election_date):
         # search voting_table
         if names:
             search_statement = '''
-                SELECT mv.id, e.nome "Eleicao", uo.nome "Unidade Organica"
+                SELECT mv.id, mv.eleicao_id, mv.unidade_organica_id, e.nome "Eleicao", uo.nome "Unidade Organica"
                 FROM mesa_de_voto mv, eleicao e, unidade_organica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and mv.id=%s
             '''

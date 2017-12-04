@@ -185,20 +185,27 @@ def choose_voting_table():
 
 @app.route('/manage_voting_table/change/<int:voting_table_id>', methods=['GET', 'POST'])
 def change_voting_table(voting_table_id):
-    # TODO check if field has changed
+    # TODO normalmente valida-se mas neste caso nçao deixa idk why
     form = forms.ChangeVotingTableForm(request.form)
-    form.election.choices = models.get_elections(True)
-    form.organic_unit.choices = models.get_organic_units()
 
-    voting_table = models.search_voting_table(voting_table_id, True, False)
-    election = voting_table[0]
-    organic_unit = voting_table[1]
-
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         election = form.election.data
         organic_unit = form.organic_unit.data
         models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
         return redirect(url_for('admin'))
+
+    # TODO check if field has changed
+    voting_table = models.search_voting_table(voting_table_id, True, False)
+
+    election_id = voting_table[1]
+    organic_unit_id = voting_table[2]
+    election = voting_table[3]
+    organic_unit = voting_table[4]
+
+    form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
+    form.election.choices = models.get_elections(True)
+    form.organic_unit.choices = models.get_organic_units()
+
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
 
@@ -246,6 +253,7 @@ def choose_election():
     return render_template('choose_election.html', form=form)
 
 
+# TODO check if election is already running
 @app.route('/election/change/<int:election_id>', methods=['GET', 'POST'])
 def change_election(election_id):
     form = forms.ChangeElectionForm(request.form)
