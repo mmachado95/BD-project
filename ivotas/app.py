@@ -307,7 +307,7 @@ def create_candidate_list():
         models.create_list(election, name, candidates)
         return redirect(url_for('admin'))
     else:
-        if form.name.data != None and len(form.name.data) <= 0 and len(form.name.data) >= 100:
+        if form.name.data != None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
         if form.candidates.data != None and len(form.candidates.data) <= 0:
             candidates_error = 'Invalid number of elements'
