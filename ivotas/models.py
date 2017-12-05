@@ -358,6 +358,7 @@ def get_elections(form_friendly):
             search_statement = '''
                 SELECT *
                 FROM eleicao
+
             '''
         cur.execute(search_statement)
         elections = cur.fetchall()
@@ -429,6 +430,36 @@ def get_lists(form_friendly, create_election):
         print(error)
     finally:
         return lists
+
+
+"""
+Get users
+"""
+def get_users(form_friendly):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get users
+        if form_friendly:
+            search_statement = '''
+                SELECT id, 'Nome: ' || nome || ' ' || 'CC: ' || cc "Identificador"
+                FROM pessoa
+            '''
+        else:
+            search_statement = '''
+                SELECT *
+                FROM pessoa
+            '''
+        cur.execute(search_statement)
+        users = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return users
 
 
 """

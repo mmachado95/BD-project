@@ -131,7 +131,7 @@ def change_department(department_id):
         models.update_organic_unit(department_id, nome=name)
         models.update_department(department_id, faculdade_id=str(faculty_id))
         return redirect(url_for('admin'))
-    elif form.faculty.data != None or form.faculty.data != None:
+    elif form.faculty.data != None:
         error = 'Nome inválido'
 
     # TODO optimize this
@@ -286,6 +286,48 @@ def change_election(election_id):
     form.type.data = election[4]
 
     return render_template('change_election.html', form=form, error=None)
+
+
+@app.route('/manage_candidate_list', methods=['GET', 'POST'])
+def manage_candidate_list():
+    return render_template('manage_candidate_list.html')
+
+
+# TODO only allow selecting elections that aren't happening
+@app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
+def create_candidate_list():
+    form = forms.CreateCandidateListForm(request.form)
+    name_error = None
+    candidates_error = None
+
+    if request.method == 'POST' and (form.name.data != None and form.candidates.data != None) and (len(form.name.data) > 0 and len(form.name.data) < 100) and len(form.candidates.data) > 0:
+        name = form.name.data
+        election = form.election.data
+        candidates = form.candidates.data
+        models.create_list(election, name, candidates)
+        return redirect(url_for('admin'))
+    else:
+        if form.name.data != None and len(form.name.data) <= 0 and len(form.name.data) >= 100:
+            name_error = 'Invalid Name'
+        if form.candidates.data != None and len(form.candidates.data) <= 0:
+            candidates_error = 'Invalid number of elements'
+
+    form.election.choices = models.get_elections(True)
+    form.candidates.choices = models.get_users(True)
+    return render_template('create_candidate_list.html', form=form, name_error=name_error, candidates_error=candidates_error)
+
+
+# TODO only allow selecting elections that aren't happening
+@app.route('/manage_candidate_list/delete', methods=['GET', 'POST'])
+def delete_candidate_list():
+    form = forms.DeleteCandidateListForm(request.form)
+    form.list.choices = models.get_lists(True, False)
+
+    if request.method == 'POST' and form.validate():
+        list = form.list.data
+        models.delete_data('lista', list)
+        return redirect(url_for('admin'))
+    return render_template('delete_candidate_list.html', form=form)
 
 
 if __name__ == '__main__':
