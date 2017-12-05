@@ -20,10 +20,11 @@
   {% elif option == 3 %}
     <form method="post">
       <dl>
-        <p>{{ current_faculty }}</p>
         {{ render_field(form.faculty) }}
-        <p>{{ current_name }}</p>
         {{ render_field(form.name) }}
+        {% if error %}
+          <p>{{ error }}</p>
+        {% endif %}
       </dl>
       <p><input type="submit" value="Change">
     </form>

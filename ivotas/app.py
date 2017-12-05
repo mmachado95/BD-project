@@ -122,22 +122,28 @@ def choose_department():
 
 @app.route('/manage_department/change/<int:department_id>', methods=['GET', 'POST'])
 def change_department(department_id):
+    form = forms.ChangeDepartmentForm(request.form)
+    error = None
+
+    if request.method == 'POST' and (len(form.name.data) > 0 and len(form.name.data) < 100):
+        faculty_id = form.faculty.data
+        name = form.name.data
+        models.update_organic_unit(department_id, nome=name)
+        models.update_department(department_id, faculdade_id=str(faculty_id))
+        return redirect(url_for('admin'))
+    elif form.faculty.data != None or form.faculty.data != None:
+        error = 'Nome inválido'
+
     # TODO optimize this
     department = models.search_department(department_id)
     department_name = department[1]
     faculty_name = models.search_organic_unit(department[0])
     faculties = models.get_faculties()
 
-    form = forms.ChangeDepartmentForm(request.form)
+    form = forms.ChangeDepartmentForm(request.form, faculty=department[0])
     form.faculty.choices = faculties
-
-    if request.method == 'POST' and form.validate():
-        faculty_id = form.faculty.data
-        name = form.name.data
-        models.update_organic_unit(department_id, nome=name)
-        models.update_department(department_id, faculdade_id=str(faculty_id))
-        return redirect(url_for('admin'))
-    return render_template('department_forms.html', form=form, option=3, current_faculty=faculty_name, current_name=department_name)
+    form.name.data = department_name
+    return render_template('department_forms.html', form=form, option=3, error=error)
 
 
 @app.route('/manage_department/delete', methods=['GET', 'POST'])
