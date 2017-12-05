@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 from ivotas.utils import get_db, get_commands, get_search_statement, get_update_statement
 
 
@@ -343,7 +344,7 @@ def get_departments():
 """
 Get elections
 """
-def get_elections(form_friendly):
+def get_elections(form_friendly, not_happening):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -354,13 +355,23 @@ def get_elections(form_friendly):
                 SELECT id, nome
                 FROM eleicao
             '''
+            cur.execute(search_statement)
+        elif not_happening:
+            now = datetime.datetime.now()
+            search_statement = '''
+                SELECT id, nome
+                FROM eleicao
+                where inicio > timestamp %s;
+            '''
+            cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT *
                 FROM eleicao
 
             '''
-        cur.execute(search_statement)
+            cur.execute(search_statement)
+
         elections = cur.fetchall()
 
         # close communication with the PostgreSQL database server
@@ -405,7 +416,7 @@ def get_voting_tables(form_friendly):
 """
 Get Lists
 """
-def get_lists(form_friendly, create_election):
+def get_lists(form_friendly):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()

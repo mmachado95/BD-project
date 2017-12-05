@@ -251,7 +251,7 @@ def create_election():
 @app.route('/election/choose', methods=['GET', 'POST'])
 def choose_election():
     form = forms.ChooseElectionForm(request.form)
-    form.election.choices = models.get_elections(True)
+    form.election.choices = models.get_elections(False, True)
 
     if request.method == 'POST' and form.validate():
         election = form.election.data
@@ -321,7 +321,7 @@ def create_candidate_list():
 @app.route('/manage_candidate_list/delete', methods=['GET', 'POST'])
 def delete_candidate_list():
     form = forms.DeleteCandidateListForm(request.form)
-    form.list.choices = models.get_lists(True, False)
+    form.list.choices = models.get_lists(True)
 
     if request.method == 'POST' and form.validate():
         list = form.list.data
