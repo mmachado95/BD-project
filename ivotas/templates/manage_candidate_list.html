@@ -3,7 +3,7 @@
 {% block content %}
   <div class="container">
     <a href="{{ url_for('create_candidate_list') }}" class="button is-info is-large">Criar</a> <br> <br>
-    <a  class="button is-info is-large">Alterar</a> <br> <br>
+    <a href="{{ url_for('choose_candidate_list') }}" class="button is-info is-large">Alterar</a> <br> <br>
     <a href="{{ url_for('delete_candidate_list') }}"  class="button is-info is-large">Remover</a> <br> <br>
     <a href="{{ url_for('manage_candidate_list') }}" class="button is-info is-large">Voltar</a> <br> <br>
   </div>

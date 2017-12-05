@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  <form method="post">
+    {% if error %}
+      <p>{{ error }}</p>
+    {% endif %}
+    <dl>
+      {{ render_field(form.name) }}
+      {{ render_field(form.election) }}
+      {{ list_id }}
+    <a href="{{ url_for('add_candidates', form=form, list_id=list_id) }}" class="button is-info is-large">Adicionar Candidatos</a> <br> <br>
+    <a href="{{ url_for('remove_candidates', form=form, list_id=list_id) }}" class="button is-info is-large">Remover Candidatos</a> <br> <br>
+    </dl>
+    <p><input type="submit" value="Change">
+  </form>
+{% endblock %}

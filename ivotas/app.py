@@ -315,7 +315,88 @@ def create_candidate_list():
     return render_template('create_candidate_list.html', form=form, name_error=name_error, candidates_error=candidates_error)
 
 
-# TODO only allow selecting elections that aren't happening
+# TODO only allow selecting lists on elections that aren't happening
+@app.route('/manage_candidate_list/choose', methods=['GET', 'POST'])
+def choose_candidate_list():
+    form = forms.ChooseCandidateListForm(request.form)
+    form.list.choices = models.get_lists(True)
+
+    if request.method == 'POST' and form.validate():
+        list = form.list.data
+        return redirect(url_for('change_candidate_list', list_id=list))
+    return render_template('choose_candidate_list.html', form=form)
+
+
+# TODO only allow selecting lists on elections that aren't happening
+@app.route('/manage_candidate_list/change/<int:list_id>', methods=['GET', 'POST'])
+def change_candidate_list(list_id):
+    name_error = None
+    form = forms.ChangeCandidateListForm(request.form)
+
+    if request.method == 'POST' and(form.name.data != None and form.candidates.data != None) and (len(form.name.data) > 0):
+        election = form.election.data
+        name = form.name.data
+        models.update_list(list_id, eleicao_id=str(election), nome=name)
+        return redirect(url_for('admin'))
+    elif form.name.data != None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
+        name_error = 'Invalid name'
+
+    list = models.search_list(list_id)
+    form = forms.ChangeCandidateListForm(request.form, election=list[1])
+    form.election.choices = models.get_elections(False, True)
+    form.name.data = list[2]
+
+    return render_template('change_candidate_list.html', form=form, error=name_error, list_id=list_id)
+
+
+# TODO only allow selecting lists on elections that aren't happening
+@app.route('/manage_candidate_list/change/<int:list_id>/add_candidates', methods=['GET', 'POST'])
+def add_candidates(list_id):
+    form = forms.AddCandidatesForm(request.form)
+
+    if request.method == 'POST':
+        candidates = form.candidates.data
+        models.add_candidates(list_id, candidates)
+        return redirect(url_for('change_candidate_list', list_id=list_id))
+
+    candidates = models.get_list_of_candidates({'status': True, 'list_id': list_id}, {'status': False})
+    form_candidates = []
+
+    # TODO optimize this with double select
+    for candidate in candidates:
+        form_candidates.append(models.search_user(candidate[0]))
+
+    form = forms.AddCandidatesForm(request.form)
+    form.candidates.choices = form_candidates
+
+    return render_template('add_candidates.html', form=form)
+
+
+# TODO only allow selecting lists on elections that aren't happening
+@app.route('/manage_candidate_list/change/<int:list_id>/remove_candidates', methods=['GET', 'POST'])
+def remove_candidates(list_id):
+    error = None
+    form = forms.RemoveCandidatesForm(request.form)
+    candidates = models.get_list_of_candidates({'status': False}, {'status': True, 'list_id': list_id})
+    form_candidates = []
+
+    for candidate in candidates:
+        form_candidates.append(models.search_user(candidate[0]))
+
+    form.candidates.choices = form_candidates
+
+    if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) < len(candidates):
+        candidates = form.candidates.data
+        for candidate in candidates:
+            models.delete_data('lista_de_candidatos', str(candidate))
+        return redirect(url_for('change_candidate_list', list_id=list_id))
+    elif form.candidates.data != None and len(form.candidates.data) >= len(candidates):
+        error = 'You can´t remove all members'
+
+    return render_template('remove_candidates.html', form=form, error=error)
+
+
+# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/delete', methods=['GET', 'POST'])
 def delete_candidate_list():
     form = forms.DeleteCandidateListForm(request.form)

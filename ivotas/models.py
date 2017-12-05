@@ -194,6 +194,29 @@ def create_list(election_id, name, users_ids):
         print(error)
 
 
+def add_candidates(list_id, users_ids):
+    try:
+        # connect to database and create cursor to execute commands in database session
+        cur = get_db('ivotas').cursor()
+
+        # insert list
+        insert_statement = '''
+            INSERT INTO lista_de_candidatos(lista_id, pessoa_id)
+            VALUES(%s, %s)
+        '''
+
+        # add users to list
+        for user_id in users_ids:
+            cur.execute(insert_statement, (str(list_id), str(user_id)))
+        # commit the changes
+        get_db('ivotas').commit()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
 """
 Create new voting table
 """
@@ -474,6 +497,51 @@ def get_users(form_friendly):
 
 
 """
+Get users
+"""
+def get_list_of_candidates(add_candidates, remove_candidates):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # TODO this fix optimizes the fix that is in the functions at the app
+        # get users
+        if add_candidates['status']:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                EXCEPT
+                SELECT pessoa_id
+                FROM lista_de_candidatos
+                WHERE lista_id=%s
+            '''
+            list_id = add_candidates['list_id']
+            cur.execute(search_statement, (list_id,))
+        elif remove_candidates['status']:
+            search_statement = '''
+                SELECT pessoa_id
+                FROM lista_de_candidatos
+                WHERE lista_id = %s
+            '''
+            list_id = remove_candidates['list_id']
+            cur.execute(search_statement, (list_id,))
+        else:
+            search_statement = '''
+                SELECT *
+                FROM lista_de_candidatos
+            '''
+            cur.execute(search_statement)
+        candidates = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return candidates
+
+
+"""
 Search organic unit based on id
 """
 def search_organic_unit(organic_unit_id):
@@ -588,6 +656,58 @@ def search_election(election_id):
         print(error)
     finally:
         return election
+
+
+"""
+Search list by id
+"""
+def search_list(list_id):
+    list_id = str(list_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT id, eleicao_id, nome
+            FROM lista
+            WHERE id=%s
+        '''
+
+        cur.execute(search_statement, (list_id,))
+        list = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return list
+
+
+"""
+Search person by id
+"""
+def search_user(user_id):
+    user_id = str(user_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT id, nome
+            FROM pessoa
+            WHERE id=%s
+        '''
+
+        cur.execute(search_statement, (user_id,))
+        user = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return user
 
 
 ########################
@@ -740,7 +860,10 @@ def delete_data(table, id_to_delete):
         cur = get_db('ivotas').cursor()
 
         # delete
-        delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
+        if table == 'lista_de_candidatos':
+            delete_statement = 'DELETE FROM ' + table + ' WHERE pessoa_id=%s'
+        else:
+            delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
         cur.execute(delete_statement, (id_to_delete,))
 
         # commit change

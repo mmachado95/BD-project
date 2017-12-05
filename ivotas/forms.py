@@ -106,5 +106,23 @@ class CreateCandidateListForm(Form):
     candidates = SelectMultipleField(label='Candidatos', coerce=int)
 
 
+class ChooseCandidateListForm(Form):
+    list = SelectField(label='Lista', coerce=int)
+
+
+class ChangeCandidateListForm(Form):
+    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    election = SelectField(label='Eleição', coerce=int)
+    candidates = SelectMultipleField(label='Candidatos', coerce=int)
+
+
+class AddCandidatesForm(Form):
+    candidates = SelectMultipleField(label='Candidatos', coerce=int)
+
+
+class RemoveCandidatesForm(Form):
+    candidates = SelectMultipleField(label='Candidatos', coerce=int)
+
+
 class DeleteCandidateListForm(Form):
-    list = SelectField(label='Listas', coerce=int)
+    list = SelectField(label='Lista', coerce=int)
