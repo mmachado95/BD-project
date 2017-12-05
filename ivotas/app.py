@@ -166,7 +166,7 @@ def manage_voting_table():
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
-    form.election.choices = models.get_elections(True)
+    form.election.choices = models.get_elections(True, False)
     form.organic_unit.choices = models.get_organic_units()
 
     if request.method == 'POST' and form.validate():
@@ -209,7 +209,7 @@ def change_voting_table(voting_table_id):
     organic_unit = voting_table[4]
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
-    form.election.choices = models.get_elections(True)
+    form.election.choices = models.get_elections(True, False)
     form.organic_unit.choices = models.get_organic_units()
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
@@ -259,7 +259,6 @@ def choose_election():
     return render_template('choose_election.html', form=form)
 
 
-# TODO check if election is already running
 @app.route('/election/change/<int:election_id>', methods=['GET', 'POST'])
 def change_election(election_id):
     form = forms.ChangeElectionForm(request.form)
@@ -293,7 +292,6 @@ def manage_candidate_list():
     return render_template('manage_candidate_list.html')
 
 
-# TODO only allow selecting elections that aren't happening
 @app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
 def create_candidate_list():
     form = forms.CreateCandidateListForm(request.form)
@@ -312,7 +310,7 @@ def create_candidate_list():
         if form.candidates.data != None and len(form.candidates.data) <= 0:
             candidates_error = 'Invalid number of elements'
 
-    form.election.choices = models.get_elections(True)
+    form.election.choices = models.get_elections(False, True)
     form.candidates.choices = models.get_users(True)
     return render_template('create_candidate_list.html', form=form, name_error=name_error, candidates_error=candidates_error)
 
