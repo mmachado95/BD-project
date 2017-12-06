@@ -126,3 +126,13 @@ class RemoveCandidatesForm(Form):
 
 class DeleteCandidateListForm(Form):
     list = SelectField(label='Lista', coerce=int)
+
+
+class IdentifyUserForm(Form):
+    field = SelectField(label='Campo', choices=[(1, 'Nome'), (2, 'CC')], coerce=int)
+    text = StringField('Texto', [validators.required(), validators.Length(min=2, max=100)])
+
+
+class AuthenticateUserForm(Form):
+    username = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    password = StringField('Password', [validators.required(), validators.Length(min=2, max=100)])

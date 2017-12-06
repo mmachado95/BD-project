@@ -710,6 +710,66 @@ def search_user(user_id):
         return user
 
 
+"""
+Search person by other fields
+"""
+def search_user_by_fields(field_type, field_text):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # Search by name
+        if field_type == 1:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE nome=%s
+            '''
+
+        # Search by CC
+        if field_type == 2:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE cc=%s
+            '''
+
+        cur.execute(search_statement, (field_text,))
+        user = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return user
+
+
+"""
+Search person by username and password
+"""
+def search_user_by_username_and_password(nome, password):
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT id
+            FROM pessoa
+            WHERE nome=%s AND password=%s
+        '''
+
+        cur.execute(search_statement, (nome, password,))
+        user = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return user
+
+
 ########################
 ### Update functions ###
 ########################
