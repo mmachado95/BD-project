@@ -30,15 +30,6 @@ def get_db(dbname):
 
 
 """
-Safe close database connection
-"""
-def close_db():
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close
-
-
-"""
 Parse sql file for commands to run
 """
 def get_commands(filename):
@@ -67,10 +58,20 @@ def get_search_statement(table, args):
 
 
 def get_update_statement(table, id_to_update, args):
+    first_iter = True
     update_statement = 'UPDATE ' + table + ' SET '
+    id_to_update = str(id_to_update)
 
     for key, value in args.items():
+        if not first_iter:
+            update_statement += ", "
         update_statement += key + '=' + "'" + value + "'"
+        first_iter  = False
 
-    update_statement += ' WHERE id=' + "'" + id_to_update + "'"
+    if table=='faculdade' or table=='departamento':
+        update_statement += ' WHERE unidade_organica_id=' + "'" + id_to_update + "'"
+    else:
+        update_statement += ' WHERE id=' + "'" + id_to_update + "'"
+
+    print(update_statement)
     return update_statement

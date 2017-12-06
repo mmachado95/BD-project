@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  <form method="post">
+    {% if error %}
+      <p>
+        {{ error }}
+      </p>
+    {% endif %}
+    <dl>
+      {{ render_field(form.name) }}
+      {{ render_field(form.description) }}
+      {{ render_field(form.start_date) }}
+      {{ render_field(form.end_date) }}
+      {{ render_field(form.type) }}
+    </dl>
+    <p><input type="submit" value="Change">
+  </form>
+{% endblock %}

@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS unidade_organica;
 
 CREATE TABLE unidade_organica (
     id SERIAL PRIMARY KEY,
-    nome VARCHAR(200) NOT NULL
+    nome VARCHAR(100) NOT NULL
 );
 CREATE TABLE faculdade (
     unidade_organica_id integer NOT NULL,
@@ -31,6 +31,9 @@ CREATE TABLE departamento (
     REFERENCES unidade_organica (id)
         ON UPDATE CASCADE ON DELETE CASCADE
 );
+-- 1 - professor
+-- 2 - funcionario
+-- 3 - aluno
 CREATE TABLE pessoa (
     id SERIAL PRIMARY KEY,
     unidade_organica_id integer NOT NULL,
@@ -55,7 +58,6 @@ CREATE TABLE eleicao (
     descricao VARCHAR(500) NOT NULL,
     inicio timestamp NOT NULL,
     fim timestamp NOT NULL,
-    acabou boolean NOT NULL,
     tipo smallint NOT NULL,
     total_votos integer DEFAULT 0,
     votos_brancos integer DEFAULT 0,
@@ -67,7 +69,6 @@ CREATE TABLE lista (
     id SERIAL PRIMARY KEY,
     eleicao_id integer NOT NULL,
     nome varchar(100) NOT NULL,
-    tipo smallint NOT NULL,
     numero_votos integer DEFAULT 0,
     FOREIGN KEY (eleicao_id)
         REFERENCES eleicao (id)

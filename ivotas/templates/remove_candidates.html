@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  <form method="post">
+    {% if error%}
+      {{ error }}
+    {% endif %}
+    <dl>
+      {{ render_field(form.candidates) }}
+    </dl>
+    <p><input type="submit" value="Remove">
+  </form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  {% if option == 1 %}
+    <form method="post">
+      <dl>
+        {{ render_field(form.name) }}
+      </dl>
+      <p><input type="submit" value="Create">
+    </form>
+  {% elif option == 2 %}
+    <form method="post">
+      <dl>
+        {{ render_field(form.faculty) }}
+        {{ render_field(form.new_name) }}
+      </dl>
+      <p><input type="submit" value="Change">
+    </form>
+  {% else %}
+    <form method="post">
+      <dl>
+        {{ render_field(form.faculty) }}
+      </dl>
+      <p><input type="submit" value="Delete">
+    </form>
+  {% endif %}
+
+{% endblock %}

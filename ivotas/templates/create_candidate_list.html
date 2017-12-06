@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  <form method="post">
+    <dl>
+      {% if name_error %}
+        <p>{{ name_error }}</p>
+      {% endif %}
+      {{ render_field(form.name) }}
+
+      {{ render_field(form.election) }}
+
+      {% if candidates_error %}
+        <p>{{ candidates_error }}</p>
+      {% endif %}
+      {{ render_field(form.candidates) }}
+    </dl>
+    <p><input type="submit" value="Create">
+  </form>
+{% endblock %}
