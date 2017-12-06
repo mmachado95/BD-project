@@ -409,5 +409,26 @@ def delete_candidate_list():
     return render_template('delete_candidate_list.html', form=form)
 
 
+
+
+
+
+@app.route('/choose_voting_table', methods=['GET', 'POST'])
+def vote_choose_voting_table():
+    form = forms.ChooseVotingTableForm(request.form)
+    form.voting_table.choices = models.get_voting_tables(True)
+
+    if request.method == 'POST' and form.validate():
+        voting_table_id = form.voting_table.data
+        return redirect(url_for('identify_user', voting_table_id=voting_table_id))
+
+    return render_template('vote_choose_voting_table.html', form=form)
+
+
+@app.route('/voting_table_<int:voting_table_id>/identify_user', methods=['GET', 'POST'])
+def identify_user(voting_table_id):
+    return render_template('identify_user.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
