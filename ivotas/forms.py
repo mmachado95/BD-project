@@ -68,16 +68,14 @@ class CreateElectionForm(Form):
     description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
     start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
-    type = SelectField(
-        label='Voting Table',
-        choices=[
-            (1, 'Conselho Geral'),
-            (2, 'Nucleo de Estudantes'),
-            (3, 'Direção Faculdade'),
-            (4, 'Direção Departamento')
-        ],
-        coerce=int
-    )
+    organic_unit = SelectField(label='Voting Table', coerce=int)
+
+
+class CreateElectionWithoutOrganicUnitForm(Form):
+    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
+    start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
+    end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
 
 
 class ChooseElectionForm(Form):

@@ -138,17 +138,24 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
 """
 Create new election
 """
-def create_election(name, description, start, finished, type):
+def create_election(name, description, start, finished, type, organic_unit):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert election in table
-        insert_statement = '''
-            INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
-            VALUES(%s, %s, %s, %s, %s)
-        '''
-        cur.execute(insert_statement, (name, description, start, finished, type,))
+        if organic_unit is not None:
+            insert_statement = '''
+                INSERT INTO eleicao(unidade_organica_id, nome, descricao, inicio, fim, tipo)
+                VALUES(%s, %s, %s, %s, %s, %s)
+            '''
+            cur.execute(insert_statement, (organic_unit, name, description, start, finished, type,))
+        else:
+            insert_statement = '''
+                INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
+                VALUES(%s, %s, %s, %s, %s)
+            '''
+            cur.execute(insert_statement, (name, description, start, finished, type,))
 
         # commit the changes
         get_db('ivotas').commit()
@@ -297,13 +304,31 @@ def create_vote(user_id, voting_table_id):
 """
 Get organic units
 """
-def get_organic_units():
+def get_organic_units(type):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
         # get organic units
-        search_statement = '''SELECT * FROM unidade_organica'''
+        if type != None:
+            if type == 3:
+                search_statement = '''
+                    SELECT id, nome
+                    FROM unidade_organica, faculdade
+                    WHERE id=unidade_organica_id
+                '''
+            elif type == 4:
+                search_statement = '''
+                    SELECT id, nome
+                    FROM unidade_organica, departamento
+                    WHERE id=unidade_organica_id
+                '''
+        else:
+            search_statement = '''
+                SELECT id, nome
+                FROM unidade_organica
+            '''
+
         cur.execute(search_statement)
         organic_units = cur.fetchall()
 

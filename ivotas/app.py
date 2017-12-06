@@ -31,7 +31,7 @@ def admin():
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
     form = forms.RegisterUserForm(request.form)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -163,11 +163,12 @@ def manage_voting_table():
     return render_template('manage_voting_table.html')
 
 
+# TODO only list organic units it can be place on
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None)
 
     if request.method == 'POST' and form.validate():
         election_id = form.election.data
@@ -210,7 +211,7 @@ def change_voting_table(voting_table_id):
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None)
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
@@ -228,9 +229,18 @@ def delete_voting_table():
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
 
-@app.route('/election/create', methods=['GET', 'POST'])
-def create_election():
-    form = forms.CreateElectionForm(request.form)
+@app.route('/election/type', methods=['GET', 'POST'])
+def choose_type():
+    return render_template('choose_type_election.html')
+
+
+@app.route('/election/create/<int:type>', methods=['GET', 'POST'])
+def create_election(type):
+    if type == 1:
+        form = forms.CreateElectionWithoutOrganicUnitForm(request.form)
+    else:
+        form = forms.CreateElectionForm(request.form)
+        form.organic_unit.choices = models.get_organic_units(type)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -241,11 +251,14 @@ def create_election():
         if start_date > end_date:
             return render_template('create_election.html', form=form, error='Datas inválidas')
 
-        type = form.type.data
-
-        models.create_election(name, description, start_date, end_date, type)
+        if type == 1:
+            models.create_election(name, description, start_date, end_date, str(type), None)
+        else:
+            organic_unit = form.organic_unit.data
+            models.create_election(name, description, start_date, end_date, str(type), str(organic_unit))
         return redirect(url_for('admin'))
-    return render_template('create_election.html', form=form, error=None)
+
+    return render_template('create_election.html', form=form, error=None, type=type)
 
 
 @app.route('/election/choose', methods=['GET', 'POST'])
@@ -350,6 +363,7 @@ def change_candidate_list(list_id):
 
 
 # TODO only allow selecting lists on elections that aren't happening
+# TODO only allow to add valid candidates
 @app.route('/manage_candidate_list/change/<int:list_id>/add_candidates', methods=['GET', 'POST'])
 def add_candidates(list_id):
     form = forms.AddCandidatesForm(request.form)
