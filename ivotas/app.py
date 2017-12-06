@@ -285,9 +285,7 @@ def change_election(election_id):
         if start_date > end_date:
             return render_template('change_election.html', form=form, error='Datas inválidas')
 
-        type = form.type.data
-
-        models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date), tipo=str(type))
+        models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date))
         return redirect(url_for('admin'))
 
     election = models.search_election(election_id)
@@ -295,7 +293,6 @@ def change_election(election_id):
     form.description.data = election[1]
     form.start_date.data = election[2]
     form.end_date.data = election[3]
-    form.type.data = election[4]
 
     return render_template('change_election.html', form=form, error=None)
 

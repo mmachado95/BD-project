@@ -310,7 +310,7 @@ def get_organic_units(type):
         cur = get_db('ivotas').cursor()
 
         # get organic units
-        if type != None:
+        if type is not None and type != 2:
             if type == 3:
                 search_statement = '''
                     SELECT id, nome
