@@ -31,7 +31,7 @@ def admin():
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
     form = forms.RegisterUserForm(request.form)
-    form.organic_unit.choices = models.get_organic_units(None)
+    form.organic_unit.choices = models.get_organic_units(None, False)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -168,7 +168,7 @@ def manage_voting_table():
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units(None)
+    form.organic_unit.choices = models.get_organic_units(None, True)
 
     if request.method == 'POST' and form.validate():
         election_id = form.election.data
@@ -211,7 +211,7 @@ def change_voting_table(voting_table_id):
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units(None)
+    form.organic_unit.choices = models.get_organic_units(None, True)
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
@@ -240,7 +240,7 @@ def create_election(type):
         form = forms.CreateElectionWithoutOrganicUnitForm(request.form)
     else:
         form = forms.CreateElectionForm(request.form)
-        form.organic_unit.choices = models.get_organic_units(type)
+        form.organic_unit.choices = models.get_organic_units(type, False)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data

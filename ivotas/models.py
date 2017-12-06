@@ -304,7 +304,7 @@ def create_vote(user_id, voting_table_id):
 """
 Get organic units
 """
-def get_organic_units(type):
+def get_organic_units(type, dep_without_voting_tables):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -323,6 +323,13 @@ def get_organic_units(type):
                     FROM unidade_organica, departamento
                     WHERE id=unidade_organica_id
                 '''
+        elif dep_without_voting_tables:
+            search_statement = '''
+                SELECT distinct(id), nome
+                FROM unidade_organica uo, departamento d, faculdade f
+                WHERE uo.id=f.unidade_organica_id OR uo.id=d.unidade_organica_id
+                AND id != ALL(select unidade_organica_id from mesa_de_voto group by unidade_organica_id)
+            '''
         else:
             search_statement = '''
                 SELECT id, nome
