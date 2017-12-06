@@ -105,13 +105,5 @@ class ChangeCandidateListForm(Form):
     candidates = SelectMultipleField(label='Candidatos', coerce=int)
 
 
-class AddCandidatesForm(Form):
-    candidates = SelectMultipleField(label='Candidatos', coerce=int)
-
-
-class RemoveCandidatesForm(Form):
-    candidates = SelectMultipleField(label='Candidatos', coerce=int)
-
-
 class DeleteCandidateListForm(Form):
     list = SelectField(label='Lista', coerce=int)
