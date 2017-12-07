@@ -658,6 +658,7 @@ def search_election(election_id):
         return election
 
 
+
 """
 Search list by id
 """
@@ -682,6 +683,32 @@ def search_list(list_id):
         print(error)
     finally:
         return list
+
+
+"""
+Search voting table by id
+"""
+def search_voting_table(voting_table_id):
+    voting_table_id = str(voting_table_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT id, eleicao_id, unidade_organica_id
+            FROM mesa_de_voto
+            WHERE id=%s
+        '''
+
+        cur.execute(search_statement, (voting_table_id,))
+        voting_table = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return voting_table
 
 
 """
@@ -768,6 +795,33 @@ def search_user_by_username_and_password(nome, password):
         print(error)
     finally:
         return user
+
+
+
+"""
+Search lists by election id
+"""
+def search_lists_of_election(election_id):
+    election_id = str(election_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT id, nome
+            FROM lista
+            WHERE eleicao_id=%s
+        '''
+
+        cur.execute(search_statement, (election_id,))
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
 
 
 ########################
@@ -933,3 +987,30 @@ def delete_data(table, id_to_delete):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
+
+def check_user_vote_in_election(user_id, election_id):
+    election_id = str(election_id)
+    user_id = str(user_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT p.id
+            FROM pessoa p, voto v, mesa_de_voto mv
+            WHERE p.id=v.pessoa_id and v.mesa_de_voto_id=mv.id and p.id=%s and mv.eleicao_id=%s;
+        '''
+
+        cur.execute(search_statement, (user_id, election_id,))
+        users = cur.fetchall()
+        print("_______")
+        print(users)
+        print("_______")
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return users

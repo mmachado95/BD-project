@@ -1,6 +1,8 @@
 from flask import Flask, request, redirect, render_template, url_for, g, session
 from ivotas import models
 from ivotas import forms
+import time
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -453,11 +455,74 @@ def authenticate_user(voting_table_id, voting_terminal_id):
         if user_id == None:
             error = 'Authentication failed'
         elif user_id[0] in users_ids:
-            print("Success")
+            user_id = user_id[0]
+            return redirect(url_for('vote', voting_table_id=voting_table_id, voting_terminal_id=voting_terminal_id, user_id=user_id))
         else:
             error = 'User not in identified users'
 
     return render_template('vote_authenticate_user.html', form=form, error=error)
+
+
+@app.route('/voting_table_<int:voting_table_id>/voting_terminal_<int:voting_terminal_id>/vote', methods=['GET', 'POST'])
+def vote(voting_table_id, voting_terminal_id):
+    user_id = eval(request.args.get('user_id'))
+
+    voting_table = models.search_voting_table(voting_table_id)
+
+    # Get Election id
+    election_id = voting_table[1]
+
+    # Get lists of election
+    lists = models.search_lists_of_election(election_id)
+
+    # Append Null and Blank votes
+    lists.append((-1, 'Nulo'))
+    lists.append((0, 'Branco'))
+
+    form = forms.ChooseCandidateListForm(request.form)
+    form.list.choices = lists
+    error = None
+
+    if request.method == 'POST' and form.validate():
+        list = form.list.data
+
+        election = models.search_election(election_id)
+        election_end = election[3]
+        current_time = datetime.fromtimestamp(time.time())
+
+        users_votes_in_election = models.check_user_vote_in_election(user_id, election_id)
+        print("****")
+        print(users_votes_in_election)
+        print(users_votes_in_election == [])
+        print("****")
+
+        # Election has ended
+        if election_end > current_time:
+            error = 'You cant vote. Election has already ended.'
+
+        # User has already voted
+        elif users_votes_in_election != []:
+            error = 'You have already voted in election.'
+
+        else:
+            print("Entering")
+            # Create vote
+            models.create_vote(user_id, voting_table_id)
+
+            return redirect(url_for('index'))
+            """
+            # Null Vote
+            if list == -1:
+                pass
+
+            # Black vote
+            elif list == 0:
+                pass
+
+            else: """
+
+
+    return render_template('vote_choose_list.html', form=form, error=error)
 
 
 if __name__ == '__main__':
