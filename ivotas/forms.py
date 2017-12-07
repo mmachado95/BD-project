@@ -101,7 +101,6 @@ class AddCandidatesForm(Form):
 class ChooseCandidateListForm(Form):
     list = SelectField(label='Lista', coerce=int)
 
-
 class ChangeCandidateListForm(Form):
     name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
     election = SelectField(label='Eleição', coerce=int)
@@ -110,6 +109,10 @@ class ChangeCandidateListForm(Form):
 
 class DeleteCandidateListForm(Form):
     list = SelectField(label='Lista', coerce=int)
+
+
+class ChooseUserForm(Form):
+    user = SelectField(label='User', coerce=int)
 
 
 class IdentifyUserForm(Form):

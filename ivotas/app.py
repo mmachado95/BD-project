@@ -416,6 +416,33 @@ def delete_candidate_list():
     return render_template('delete_candidate_list.html', form=form)
 
 
+@app.route('/know_where_user_voted', methods=['GET', 'POST'])
+def know_where_user_voted():
+    form = forms.ChooseUserForm(request.form)
+    form.user.choices = models.get_users(True, {'status': False})
+
+    if request.method == 'POST' and form.validate():
+        user_id = form.user.data
+        return redirect(url_for('know_where_user_voted_choose_election', user_id=user_id))
+    return render_template('know_where_user_voted.html', form=form)
+
+
+@app.route('/know_where_user_voted/user_<int:user_id>/choose_election', methods=['GET', 'POST'])
+def know_where_user_voted_choose_election(user_id):
+    form = forms.ChooseElectionForm(request.form)
+    form.election.choices = models.search_elections_that_user_voted(user_id)
+
+    if request.method == 'POST' and form.validate():
+        election_id = form.election.data
+        return redirect(url_for('know_where_user_voted_end', user_id=user_id, election_id=election_id))
+    return render_template('know_where_user_voted_choose_election.html', form=form)
+
+@app.route('/know_where_user_voted/user_<int:user_id>/election_<int:election_id>', methods=['GET', 'POST'])
+def know_where_user_voted_end(user_id, election_id):
+    place = models.get_place_where_user_voted(user_id, election_id)[0]
+    return render_template('know_where_user_voted_end.html', place=place)
+
+
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
