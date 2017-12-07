@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+{% block content %}
+  <form method="post">
+    <dl>
+      {{ render_field(form.username) }}
+      {{ render_field(form.password) }}
+    </dl>
+    <p><input type="submit">
+  </form>
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+{% endblock %}
