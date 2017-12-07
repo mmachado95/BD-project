@@ -20,8 +20,8 @@ def close_db(exception):
 
 @app.route("/")
 def index():
-    models.create_tables()
-    models.seed_tables()
+    #models.create_tables()
+    #models.seed_tables()
     return render_template('main.html')
 
 
@@ -491,7 +491,7 @@ def vote(voting_table_id, voting_terminal_id):
     if request.method == 'POST' and form.validate():
         list = form.list.data
 
-        election = models.search_election(election_id)
+        election = models.search_election(election_id, False)
         election_end = election[3]
         current_time = datetime.fromtimestamp(time.time())
 
@@ -502,7 +502,11 @@ def vote(voting_table_id, voting_terminal_id):
         print("****")
 
         # Election has ended
-        if election_end > current_time:
+        if election_end < current_time:
+            print("oooooooooooo")
+            print(election_end)
+            print(current_time)
+            print("oooooooooooo")
             error = 'You cant vote. Election has already ended.'
 
         # User has already voted
@@ -515,6 +519,7 @@ def vote(voting_table_id, voting_terminal_id):
             models.create_vote(user_id, voting_table_id)
 
             return redirect(url_for('index'))
+
             """
             # Null Vote
             if list == -1:
@@ -524,7 +529,9 @@ def vote(voting_table_id, voting_terminal_id):
             elif list == 0:
                 pass
 
-            else: """
+            # Counter of list
+            else:
+                pass """
 
 
     return render_template('vote_choose_list.html', form=form, error=error)
