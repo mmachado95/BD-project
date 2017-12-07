@@ -8,13 +8,7 @@
         <p>{{ name_error }}</p>
       {% endif %}
       {{ render_field(form.name) }}
-
       {{ render_field(form.election) }}
-
-      {% if candidates_error %}
-        <p>{{ candidates_error }}</p>
-      {% endif %}
-      {{ render_field(form.candidates) }}
     </dl>
     <p><input type="submit" value="Create">
   </form>

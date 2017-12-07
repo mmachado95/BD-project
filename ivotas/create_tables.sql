@@ -54,6 +54,7 @@ CREATE TABLE pessoa (
 -- 4- dir dep
 CREATE TABLE eleicao (
     id SERIAL PRIMARY KEY,
+    unidade_organica_id integer,
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(500) NOT NULL,
     inicio timestamp NOT NULL,
@@ -63,7 +64,10 @@ CREATE TABLE eleicao (
     votos_brancos integer DEFAULT 0,
     percentagem_brancos real DEFAULT 0.0,
     votos_nulos integer DEFAULT 0,
-    percentagem_nulos real DEFAULT 0.0
+    percentagem_nulos real DEFAULT 0.0,
+    FOREIGN KEY (unidade_organica_id)
+      REFERENCES unidade_organica (id)
+      ON UPDATE CASCADE ON DELETE CASCADE
 );
 CREATE TABLE lista (
     id SERIAL PRIMARY KEY,

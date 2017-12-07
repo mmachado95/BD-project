@@ -31,7 +31,7 @@ def admin():
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
     form = forms.RegisterUserForm(request.form)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None, False)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -163,11 +163,12 @@ def manage_voting_table():
     return render_template('manage_voting_table.html')
 
 
+# TODO only list organic units it can be place on
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None, True)
 
     if request.method == 'POST' and form.validate():
         election_id = form.election.data
@@ -210,7 +211,7 @@ def change_voting_table(voting_table_id):
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
     form.election.choices = models.get_elections(True, False)
-    form.organic_unit.choices = models.get_organic_units()
+    form.organic_unit.choices = models.get_organic_units(None, True)
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
@@ -228,9 +229,18 @@ def delete_voting_table():
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
 
-@app.route('/election/create', methods=['GET', 'POST'])
-def create_election():
-    form = forms.CreateElectionForm(request.form)
+@app.route('/election/type', methods=['GET', 'POST'])
+def choose_type():
+    return render_template('choose_type_election.html')
+
+
+@app.route('/election/create/<int:type>', methods=['GET', 'POST'])
+def create_election(type):
+    if type == 1:
+        form = forms.CreateElectionWithoutOrganicUnitForm(request.form)
+    else:
+        form = forms.CreateElectionForm(request.form)
+        form.organic_unit.choices = models.get_organic_units(type, False)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -241,11 +251,14 @@ def create_election():
         if start_date > end_date:
             return render_template('create_election.html', form=form, error='Datas inválidas')
 
-        type = form.type.data
-
-        models.create_election(name, description, start_date, end_date, type)
+        if type == 1:
+            models.create_election(name, description, start_date, end_date, str(type), None)
+        else:
+            organic_unit = form.organic_unit.data
+            models.create_election(name, description, start_date, end_date, str(type), str(organic_unit))
         return redirect(url_for('admin'))
-    return render_template('create_election.html', form=form, error=None)
+
+    return render_template('create_election.html', form=form, error=None, type=type)
 
 
 @app.route('/election/choose', methods=['GET', 'POST'])
@@ -272,17 +285,14 @@ def change_election(election_id):
         if start_date > end_date:
             return render_template('change_election.html', form=form, error='Datas inválidas')
 
-        type = form.type.data
-
-        models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date), tipo=str(type))
+        models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date))
         return redirect(url_for('admin'))
 
-    election = models.search_election(election_id)
+    election = models.search_election(election_id, False)
     form.name.data = election[0]
     form.description.data = election[1]
     form.start_date.data = election[2]
     form.end_date.data = election[3]
-    form.type.data = election[4]
 
     return render_template('change_election.html', form=form, error=None)
 
@@ -292,27 +302,69 @@ def manage_candidate_list():
     return render_template('manage_candidate_list.html')
 
 
+#TODO refactor this, old code the candidates error doesnt happen anymore
 @app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
 def create_candidate_list():
     form = forms.CreateCandidateListForm(request.form)
     name_error = None
-    candidates_error = None
 
-    if request.method == 'POST' and (form.name.data != None and form.candidates.data != None) and (len(form.name.data) > 0 and len(form.name.data) < 100) and len(form.candidates.data) > 0:
+    if request.method == 'POST' and (form.name.data is not None) and (len(form.name.data) > 0 and len(form.name.data) < 100):
         name = form.name.data
         election = form.election.data
-        candidates = form.candidates.data
-        models.create_list(election, name, candidates)
-        return redirect(url_for('admin'))
+        list_id = models.create_list(election, name)
+        if models.search_election(election, True)[0] == 1:
+            return redirect(url_for('choose_list_type', election_id=election, list_id=list_id, list_type=1))
+        else:
+            return redirect(url_for('add_candidates', election_id=election, list_id=list_id))
     else:
-        if form.name.data != None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
+        if form.name.data is not None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
-        if form.candidates.data != None and len(form.candidates.data) <= 0:
-            candidates_error = 'Invalid number of elements'
 
     form.election.choices = models.get_elections(False, True)
-    form.candidates.choices = models.get_users(True)
-    return render_template('create_candidate_list.html', form=form, name_error=name_error, candidates_error=candidates_error)
+    return render_template('create_candidate_list.html', form=form, name_error=name_error)
+
+
+@app.route('/manage_candidate_list/create/choose_list_type/<int:election_id>/<int:list_id>', methods=['GET', 'POST'])
+def choose_list_type(election_id, list_id):
+    return render_template('choose_list_type.html', election_id=election_id, list_id=list_id)
+
+
+# Given the election type return the users that can apply to that election
+def get_candidates_of_type(election_type, election_id, list_type):
+    candidates = []
+
+    if list_type is not None:
+        candidates = models.get_users(False, {'status': True, 'type': list_type, 'id': election_id})
+    elif election_type == 2:
+        candidates = models.get_users(False, {'status': True, 'type': 3, 'id': election_id})
+    elif election_type == 3:
+        candidates = models.get_users(False, {'status': True, 'type': 1, 'id': election_id})
+    elif election_type == 4:
+        candidates = models.get_users(False, {'status': True, 'type': 1, 'id': election_id})
+
+    return candidates
+
+
+@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>', methods=['GET', 'POST'], defaults={'list_type': None})
+@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>/<int:list_type>', methods=['GET', 'POST'])
+def add_candidates(election_id, list_id, list_type):
+    form = forms.AddCandidatesForm(request.form)
+    election_type = models.search_election(election_id, True)
+    form.candidates.choices = get_candidates_of_type(election_type[0], election_id, None)
+
+    if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) > 0:
+        candidates = form.candidates.data
+        models.add_candidates(list_id, candidates)
+        return redirect(url_for('admin'))
+
+    form = forms.AddCandidatesForm(request.form)
+    election_type = models.search_election(election_id, True)
+    if list_type:
+        form.candidates.choices = get_candidates_of_type(election_type[0], election_id, list_type)
+    else:
+        form.candidates.choices = get_candidates_of_type(election_type[0], election_id, None)
+
+    return render_template('add_candidates.html', form=form)
 
 
 # TODO only allow selecting lists on elections that aren't happening
@@ -347,53 +399,6 @@ def change_candidate_list(list_id):
     form.name.data = list[2]
 
     return render_template('change_candidate_list.html', form=form, error=name_error, list_id=list_id)
-
-
-# TODO only allow selecting lists on elections that aren't happening
-@app.route('/manage_candidate_list/change/<int:list_id>/add_candidates', methods=['GET', 'POST'])
-def add_candidates(list_id):
-    form = forms.AddCandidatesForm(request.form)
-
-    if request.method == 'POST':
-        candidates = form.candidates.data
-        models.add_candidates(list_id, candidates)
-        return redirect(url_for('change_candidate_list', list_id=list_id))
-
-    candidates = models.get_list_of_candidates({'status': True, 'list_id': list_id}, {'status': False})
-    form_candidates = []
-
-    # TODO optimize this with double select
-    for candidate in candidates:
-        form_candidates.append(models.search_user(candidate[0]))
-
-    form = forms.AddCandidatesForm(request.form)
-    form.candidates.choices = form_candidates
-
-    return render_template('add_candidates.html', form=form)
-
-
-# TODO only allow selecting lists on elections that aren't happening
-@app.route('/manage_candidate_list/change/<int:list_id>/remove_candidates', methods=['GET', 'POST'])
-def remove_candidates(list_id):
-    error = None
-    form = forms.RemoveCandidatesForm(request.form)
-    candidates = models.get_list_of_candidates({'status': False}, {'status': True, 'list_id': list_id})
-    form_candidates = []
-
-    for candidate in candidates:
-        form_candidates.append(models.search_user(candidate[0]))
-
-    form.candidates.choices = form_candidates
-
-    if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) < len(candidates):
-        candidates = form.candidates.data
-        for candidate in candidates:
-            models.delete_data('lista_de_candidatos', str(candidate))
-        return redirect(url_for('change_candidate_list', list_id=list_id))
-    elif form.candidates.data != None and len(form.candidates.data) >= len(candidates):
-        error = 'You can´t remove all members'
-
-    return render_template('remove_candidates.html', form=form, error=error)
 
 
 # TODO only allow selecting lists on elections that aren't happening

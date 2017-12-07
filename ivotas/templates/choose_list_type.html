@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <a href="{{ url_for('add_candidates', election_id=election_id, list_id=list_id, list_type=1 ) }}" class="button is-info is-large">Professores</a> <br> <br>
+  <a href="{{ url_for('add_candidates', election_id=election_id, list_id=list_id, list_type=2 ) }}" class="button is-info is-large">Funcionários</a> <br> <br>
+  <a href="{{ url_for('add_candidates', election_id=election_id, list_id=list_id, list_type=3 ) }}" class="button is-info is-large">Alunos</a> <br> <br>
+</div>
+{% endblock %}
