@@ -312,7 +312,10 @@ def create_candidate_list():
         name = form.name.data
         election = form.election.data
         list_id = models.create_list(election, name)
-        return redirect(url_for('add_candidates', election_id=election, list_id=list_id))
+        if models.search_election(election, True)[0] == 1:
+            return redirect(url_for('choose_list_type', election_id=election, list_id=list_id, list_type=1))
+        else:
+            return redirect(url_for('add_candidates', election_id=election, list_id=list_id))
     else:
         if form.name.data is not None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
@@ -321,12 +324,17 @@ def create_candidate_list():
     return render_template('create_candidate_list.html', form=form, name_error=name_error)
 
 
+@app.route('/manage_candidate_list/create/choose_list_type/<int:election_id>/<int:list_id>', methods=['GET', 'POST'])
+def choose_list_type(election_id, list_id):
+    return render_template('choose_list_type.html', election_id=election_id, list_id=list_id)
+
+
 # Given the election type return the users that can apply to that election
-def get_candidates_of_type(election_type, election_id):
+def get_candidates_of_type(election_type, election_id, list_type):
     candidates = []
 
-    if election_type == 1:
-        candidates = models.get_users(False, {'status': True, 'type': 0, 'id': election_id})
+    if list_type is not None:
+        candidates = models.get_users(False, {'status': True, 'type': list_type, 'id': election_id})
     elif election_type == 2:
         candidates = models.get_users(False, {'status': True, 'type': 3, 'id': election_id})
     elif election_type == 3:
@@ -337,21 +345,24 @@ def get_candidates_of_type(election_type, election_id):
     return candidates
 
 
-# TODO no caso de ser conselho geral escolher por tipo apenas
-@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>', methods=['GET', 'POST'])
-def add_candidates(election_id, list_id):
+@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>', methods=['GET', 'POST'], defaults={'list_type': None})
+@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>/<int:list_type>', methods=['GET', 'POST'])
+def add_candidates(election_id, list_id, list_type):
     form = forms.AddCandidatesForm(request.form)
     election_type = models.search_election(election_id, True)
-    form.candidates.choices = get_candidates_of_type(election_type[0], election_id)
+    form.candidates.choices = get_candidates_of_type(election_type[0], election_id, None)
 
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) > 0:
         candidates = form.candidates.data
         models.add_candidates(list_id, candidates)
         return redirect(url_for('admin'))
 
     form = forms.AddCandidatesForm(request.form)
     election_type = models.search_election(election_id, True)
-    form.candidates.choices = get_candidates_of_type(election_type[0], election_id)
+    if list_type:
+        form.candidates.choices = get_candidates_of_type(election_type[0], election_id, list_type)
+    else:
+        form.candidates.choices = get_candidates_of_type(election_type[0], election_id, None)
 
     return render_template('add_candidates.html', form=form)
 
