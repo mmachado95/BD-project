@@ -288,7 +288,7 @@ def change_election(election_id):
         models.update_election(election_id, nome=name, descricao=description, inicio=str(start_date), fim=str(end_date))
         return redirect(url_for('admin'))
 
-    election = models.search_election(election_id)
+    election = models.search_election(election_id, False)
     form.name.data = election[0]
     form.description.data = election[1]
     form.start_date.data = election[2]
@@ -302,27 +302,58 @@ def manage_candidate_list():
     return render_template('manage_candidate_list.html')
 
 
+#TODO refactor this, old code the candidates error doesnt happen anymore
 @app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
 def create_candidate_list():
     form = forms.CreateCandidateListForm(request.form)
     name_error = None
-    candidates_error = None
 
-    if request.method == 'POST' and (form.name.data != None and form.candidates.data != None) and (len(form.name.data) > 0 and len(form.name.data) < 100) and len(form.candidates.data) > 0:
+    if request.method == 'POST' and (form.name.data is not None) and (len(form.name.data) > 0 and len(form.name.data) < 100):
         name = form.name.data
         election = form.election.data
-        candidates = form.candidates.data
-        models.create_list(election, name, candidates)
-        return redirect(url_for('admin'))
+        list_id = models.create_list(election, name)
+        return redirect(url_for('add_candidates', election_id=election, list_id=list_id))
     else:
-        if form.name.data != None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
+        if form.name.data is not None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
-        if form.candidates.data != None and len(form.candidates.data) <= 0:
-            candidates_error = 'Invalid number of elements'
 
     form.election.choices = models.get_elections(False, True)
-    form.candidates.choices = models.get_users(True)
-    return render_template('create_candidate_list.html', form=form, name_error=name_error, candidates_error=candidates_error)
+    return render_template('create_candidate_list.html', form=form, name_error=name_error)
+
+
+# Given the election type return the users that can apply to that election
+def get_candidates_of_type(election_type, election_id):
+    candidates = []
+
+    if election_type == 1:
+        candidates = models.get_users(False, {'status': True, 'type': 0, 'id': election_id})
+    elif election_type == 2:
+        candidates = models.get_users(False, {'status': True, 'type': 3, 'id': election_id})
+    elif election_type == 3:
+        candidates = models.get_users(False, {'status': True, 'type': 1, 'id': election_id})
+    elif election_type == 4:
+        candidates = models.get_users(False, {'status': True, 'type': 1, 'id': election_id})
+
+    return candidates
+
+
+# TODO no caso de ser conselho geral escolher por tipo apenas
+@app.route('/manage_candidate_list/create/<int:election_id>/<int:list_id>', methods=['GET', 'POST'])
+def add_candidates(election_id, list_id):
+    form = forms.AddCandidatesForm(request.form)
+    election_type = models.search_election(election_id, True)
+    form.candidates.choices = get_candidates_of_type(election_type[0], election_id)
+
+    if request.method == 'POST' and form.validate():
+        candidates = form.candidates.data
+        models.add_candidates(list_id, candidates)
+        return redirect(url_for('admin'))
+
+    form = forms.AddCandidatesForm(request.form)
+    election_type = models.search_election(election_id, True)
+    form.candidates.choices = get_candidates_of_type(election_type[0], election_id)
+
+    return render_template('add_candidates.html', form=form)
 
 
 # TODO only allow selecting lists on elections that aren't happening

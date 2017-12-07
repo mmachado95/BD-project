@@ -92,6 +92,9 @@ class ChangeElectionForm(Form):
 class CreateCandidateListForm(Form):
     name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
     election = SelectField(label='Eleição', coerce=int)
+
+
+class AddCandidatesForm(Form):
     candidates = SelectMultipleField(label='Candidatos', coerce=int)
 
 

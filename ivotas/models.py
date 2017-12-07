@@ -169,7 +169,7 @@ def create_election(name, description, start, finished, type, organic_unit):
 """
 Create new list for election
 """
-def create_list(election_id, name, users_ids):
+def create_list(election_id, name):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
@@ -182,16 +182,9 @@ def create_list(election_id, name, users_ids):
         '''
         cur.execute(insert_statement, (election_id, name,))
 
-        # get list id and create new insert statement
+        # fetch id that was inserted
         list_id = cur.fetchone()[0]
-        insert_statement = '''
-            INSERT INTO lista_de_candidatos(lista_id, pessoa_id)
-            VALUES(%s, %s)
-        '''
 
-        # add users to list
-        for user_id in users_ids:
-            cur.execute(insert_statement, (list_id, user_id))
         # commit the changes
         get_db('ivotas').commit()
 
@@ -199,6 +192,8 @@ def create_list(election_id, name, users_ids):
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+    finally:
+        return list_id
 
 
 def add_candidates(list_id, users_ids):
@@ -501,7 +496,7 @@ def get_lists(form_friendly):
 """
 Get users
 """
-def get_users(form_friendly):
+def get_users(form_friendly, by_type):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -512,12 +507,25 @@ def get_users(form_friendly):
                 SELECT id, 'Nome: ' || nome || ' ' || 'CC: ' || cc "Identificador"
                 FROM pessoa
             '''
+            cur.execute(search_statement)
+        elif by_type['status']:
+            search_statement = '''
+                SELECT p.id, 'Nome: ' || p.nome || ' ' || 'CC: ' || p.cc "Identificador"
+                FROM pessoa p
+                WHERE tipo=%s
+                AND id!=all(
+                    select lc.pessoa_id
+                    from lista l, lista_de_candidatos lc
+                    where lc.lista_id=l.id and l.eleicao_id=%s
+                )
+            '''
+            cur.execute(search_statement, (by_type['type'], by_type['id'],))
         else:
             search_statement = '''
                 SELECT *
                 FROM pessoa
             '''
-        cur.execute(search_statement)
+            cur.execute(search_statement)
         users = cur.fetchall()
 
         # close communication with the PostgreSQL database server
@@ -531,38 +539,16 @@ def get_users(form_friendly):
 """
 Get users
 """
-def get_list_of_candidates(add_candidates, remove_candidates):
+def get_list_of_candidates(election_id):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # TODO this fix optimizes the fix that is in the functions at the app
-        # get users
-        if add_candidates['status']:
-            search_statement = '''
-                SELECT id
-                FROM pessoa
-                EXCEPT
-                SELECT pessoa_id
-                FROM lista_de_candidatos
-                WHERE lista_id=%s
-            '''
-            list_id = add_candidates['list_id']
-            cur.execute(search_statement, (list_id,))
-        elif remove_candidates['status']:
-            search_statement = '''
-                SELECT pessoa_id
-                FROM lista_de_candidatos
-                WHERE lista_id = %s
-            '''
-            list_id = remove_candidates['list_id']
-            cur.execute(search_statement, (list_id,))
-        else:
-            search_statement = '''
-                SELECT *
-                FROM lista_de_candidatos
-            '''
-            cur.execute(search_statement)
+        search_statement = '''
+            SELECT *
+            FROM lista_de_candidatos
+        '''
+        cur.execute(search_statement)
         candidates = cur.fetchall()
 
         # close communication with the PostgreSQL database server
@@ -667,17 +653,24 @@ def search_voting_table(voting_table_id, names, election_date):
 """
 Search election by id
 """
-def search_election(election_id):
+def search_election(election_id, returns_type):
     election_id = str(election_id)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        search_statement = '''
-            SELECT nome, descricao, inicio, fim, tipo
-            FROM eleicao
-            WHERE id=%s
-        '''
+        if returns_type:
+            search_statement = '''
+                SELECT tipo
+                FROM eleicao
+                WHERE id=%s
+            '''
+        else:
+            search_statement = '''
+                SELECT nome, descricao, inicio, fim, tipo
+                FROM eleicao
+                WHERE id=%s
+            '''
 
         cur.execute(search_statement, (election_id,))
         election = cur.fetchone()
