@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, render_template, url_for, g, session
 from ivotas import models
 from ivotas import forms
+from ivotas import utils
 import time
 from datetime import datetime
 
@@ -49,6 +50,61 @@ def register_person():
 
         return redirect(url_for('admin'))
     return render_template('register_user.html', form=form)
+
+
+@app.route('/choose_user', methods=['GET', 'POST'])
+def choose_person():
+    form = forms.ChooseUserForm(request.form)
+    form.user.choices = models.get_users(True, {'status': False})
+
+    if request.method == 'POST' and form.validate():
+        user = form.user.data
+        return redirect(url_for('change_person', user_id=user))
+    return render_template('choose_user.html', form=form)
+
+
+@app.route('/change_user/<int:user_id>', methods=['GET', 'POST'])
+def change_person(user_id):
+    error = None
+    form = forms.ChangeUserForm(request.form)
+
+    # missing validators
+    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data):
+        name = form.name.data
+        organic_unit_id = form.organic_unit.data
+        contact = form.contact.data
+        address = form.address.data
+        cc = form.cc.data
+        end_date = form.end_date.data
+        type = form.type.data
+
+        error = models.update_user(
+            str(user_id),
+            unidade_organica_id=str(organic_unit_id),
+            nome=name,
+            contacto=contact,
+            morada=address,
+            cc=cc,
+            data_validade=str(end_date),
+            tipo=str(type)
+        )
+        if error:
+            user = models.search_user(user_id)
+            form = forms.ChangeUserForm(request.form, organic_unit=user[1])
+            form.organic_unit.choices = models.get_organic_units(None, None)
+            form = utils.set_user_form_values(form, user)
+            return render_template('change_user.html', form=form, error=error)
+
+        return redirect(url_for('admin'))
+    elif form.type.choices is not None:
+        error = 'Invalid input'
+
+    user = models.search_user(user_id)
+    form = forms.ChangeUserForm(request.form, organic_unit=user[1])
+    form.organic_unit.choices = models.get_organic_units(None, None)
+    form = utils.set_user_form_values(form, user)
+
+    return render_template('change_user.html', form=form, error=error)
 
 
 @app.route('/manage_faculty', methods=['GET', 'POST'])

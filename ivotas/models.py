@@ -796,10 +796,14 @@ def search_user(user_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, nome
+            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo
             FROM pessoa
             WHERE id=%s
         '''
+        print('+++++++++++++++')
+        print(search_statement)
+        print(user_id)
+        print('+++++++++++++++')
 
         cur.execute(search_statement, (user_id,))
         user = cur.fetchone()
@@ -979,21 +983,27 @@ Update user
 """
 def update_user(id_to_update, **kwargs):
     id_to_update = str(id_to_update)
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
+    error = None
 
+    # connect to database
+    cur = get_db('ivotas').cursor()
+
+    try:
         # update user
         update_statement = get_update_statement('pessoa', id_to_update, kwargs)
         cur.execute(update_statement)
 
-        # commit change
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+        error = 'That cc already exists'
+    else:
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+
+    return error
 
 
 """
@@ -1105,9 +1115,6 @@ def check_user_vote_in_election(user_id, election_id):
 
         cur.execute(search_statement, (user_id, election_id,))
         users = cur.fetchall()
-        print("_______")
-        print(users)
-        print("_______")
 
         # close communication with the PostgreSQL database server
         cur.close()

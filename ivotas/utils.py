@@ -75,3 +75,29 @@ def get_update_statement(table, id_to_update, args):
 
     print(update_statement)
     return update_statement
+
+
+def set_user_form_values(form, user):
+    form.name.data = user[2]
+    form.contact.data = user[3]
+    form.address.data = user[4]
+    form.cc.data = user[5]
+    form.end_date.data = user[6]
+    form.type.choices = [(1, 'Professor'), (2, 'Funcionário'), (3, 'Estudante')]
+    return form
+
+
+def validate_user_change(name, contact, address, cc, end_date, type):
+    if name is None or (len(name) <= 1 or len(name) >= 100):
+        return False
+    if contact is None or (len(contact) <= 1 or len(contact) >= 100):
+        return False
+    if address is None or (len(address) <= 1 or len(address) >= 100):
+        return False
+    if cc is None or (len(cc) <= 1 or len(cc) >= 10):
+        return False
+    if end_date is None:
+        return False
+    if type is None:
+        return False
+    return True
