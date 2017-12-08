@@ -737,6 +737,32 @@ def search_voting_table(voting_table_id):
 
 
 """
+Search elections that user voted
+"""
+def search_elections_that_user_voted(user_id):
+    user_id = str(user_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT e.id, e.nome
+            FROM eleicao e, mesa_de_voto mv, pessoa p, voto v
+            WHERE p.id=%s AND p.id=v.id AND v.mesa_de_voto_id=mv.id and mv.eleicao_id=e.id
+        '''
+
+        cur.execute(search_statement, (user_id,))
+        elections_ids = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return elections_ids
+
+
+"""
 Search person by id
 """
 def search_user(user_id):
@@ -847,6 +873,32 @@ def search_lists_of_election(election_id):
         print(error)
     finally:
         return lists
+
+
+"""
+Search lists by election id
+"""
+def get_place_where_user_voted(user_id, election_id):
+    election_id = str(election_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT uo.nome
+            FROM unidade_organica uo, eleicao e, mesa_de_voto mv, voto v, pessoa p
+            WHERE mv.eleicao_id=e.id AND mv.id=v.mesa_de_voto_id AND mv.unidade_organica_id=uo.id AND v.pessoa_id=p.id AND p.id=%s AND e.id=%s
+        '''
+
+        cur.execute(search_statement, (user_id, election_id,))
+        place = cur.fetchone()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return place
 
 
 ########################
