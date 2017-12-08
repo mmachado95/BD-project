@@ -568,7 +568,7 @@ def authenticate_user(voting_table_id, voting_terminal_id):
     if request.method == 'POST' and form.validate():
         username = form.username.data
         password = form.password.data
-        user_id = models.search_user_by_username_and_password(username, password)
+        user_id = models.search_user_by_username_and_password(username, password, False)
         if user_id == None:
             error = 'Authentication failed'
         elif user_id[0] in users_ids:
