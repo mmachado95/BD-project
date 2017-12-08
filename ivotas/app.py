@@ -27,7 +27,8 @@ def index():
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    voting_tables = models.search_voting_tables_of_election()
+    return render_template('admin.html', voting_tables=voting_tables)
 
 
 @app.route('/create_user', methods=['GET', 'POST'])

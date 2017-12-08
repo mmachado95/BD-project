@@ -433,6 +433,33 @@ def get_elections(form_friendly, not_happening):
 
 
 """
+Get elections happening now
+"""
+def get_elections_present():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get elections
+        now = datetime.datetime.now()
+        search_statement = '''
+            SELECT id, nome
+            FROM eleicao
+            WHERE inicio < timestamp %s AND fim > timestamp %s;
+        '''
+        cur.execute(search_statement, (now, now,))
+
+        elections = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return elections
+
+
+"""
 Get elections in the past
 """
 def get_elections_past():
@@ -760,6 +787,35 @@ def search_voting_table(voting_table_id):
         print(error)
     finally:
         return voting_table
+
+
+"""
+Search voting tables by election id
+"""
+def search_voting_tables_of_election():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME, COUNT(votes_of_voting_table)
+            FROM (SELECT mv.id MV_ID, e.id E_ID, e.nome E_NOME
+                    FROM eleicao e, mesa_de_voto mv, voto v
+                    WHERE e.id=mv.eleicao_id AND mv.id=v.mesa_de_voto_id
+            ) AS votes_of_voting_table
+            GROUP BY votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME
+            ORDER BY votes_of_voting_table.E_ID
+        '''
+
+        cur.execute(search_statement)
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
 
 
 """
