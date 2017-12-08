@@ -169,7 +169,7 @@ def manage_voting_table():
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
-    form.election.choices = models.get_elections(True, False)
+    form.election.choices = models.get_elections(False, False, True)
     form.organic_unit.choices = models.get_organic_units(None, True)
 
     if request.method == 'POST' and form.validate():
@@ -194,7 +194,6 @@ def choose_voting_table():
 
 @app.route('/manage_voting_table/change/<int:voting_table_id>', methods=['GET', 'POST'])
 def change_voting_table(voting_table_id):
-    # TODO normalmente valida-se mas neste caso nçao deixa idk why
     form = forms.ChangeVotingTableForm(request.form)
 
     if request.method == 'POST':
@@ -212,7 +211,7 @@ def change_voting_table(voting_table_id):
     organic_unit = voting_table[4]
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
-    form.election.choices = models.get_elections(True, False)
+    form.election.choices = models.get_elections(True, False, False)
     form.organic_unit.choices = models.get_organic_units(None, True)
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
@@ -266,7 +265,7 @@ def create_election(type):
 @app.route('/election/choose', methods=['GET', 'POST'])
 def choose_election():
     form = forms.ChooseElectionForm(request.form)
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
 
     if request.method == 'POST' and form.validate():
         election = form.election.data
@@ -322,7 +321,7 @@ def create_candidate_list():
         if form.name.data is not None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
 
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
     return render_template('create_candidate_list.html', form=form, name_error=name_error)
 
 
@@ -397,7 +396,7 @@ def change_candidate_list(list_id):
 
     list = models.search_list(list_id)
     form = forms.ChangeCandidateListForm(request.form, election=list[1])
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
     form.name.data = list[2]
 
     return render_template('change_candidate_list.html', form=form, error=name_error, list_id=list_id)

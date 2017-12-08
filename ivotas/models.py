@@ -400,7 +400,7 @@ def get_departments():
 """
 Get elections
 """
-def get_elections(form_friendly, not_happening):
+def get_elections(form_friendly, future_elections, future_and_present_elections):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -412,7 +412,8 @@ def get_elections(form_friendly, not_happening):
                 FROM eleicao
             '''
             cur.execute(search_statement)
-        elif not_happening:
+        # TODO change the logic to happeninbg in other condition
+        elif future_elections:
             now = datetime.datetime.now()
             search_statement = '''
                 SELECT id, nome
@@ -420,6 +421,14 @@ def get_elections(form_friendly, not_happening):
                 where inicio > timestamp %s;
             '''
             cur.execute(search_statement, (now,))
+        elif future_and_present_elections:
+            now = datetime.datetime.now()
+            search_statement = '''
+                SELECT id, nome
+                FROM eleicao
+                where inicio > timestamp %s or fim > timestamp %s;
+            '''
+            cur.execute(search_statement, (now, now,))
         else:
             search_statement = '''
                 SELECT *
