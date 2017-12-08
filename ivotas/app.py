@@ -184,7 +184,7 @@ def create_voting_table():
 @app.route('/manage_voting_table/choose', methods=['GET', 'POST'])
 def choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(True, False)
 
     if request.method == 'POST' and form.validate():
         id_to_update = form.voting_table.data
@@ -222,7 +222,7 @@ def change_voting_table(voting_table_id):
 @app.route('/manage_voting_table/delete', methods=['GET', 'POST'])
 def delete_voting_table():
     form = forms.DeleteVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(True, False)
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data
@@ -437,6 +437,7 @@ def know_where_user_voted_choose_election(user_id):
         return redirect(url_for('know_where_user_voted_end', user_id=user_id, election_id=election_id))
     return render_template('know_where_user_voted_choose_election.html', form=form)
 
+
 @app.route('/know_where_user_voted/user_<int:user_id>/election_<int:election_id>', methods=['GET', 'POST'])
 def know_where_user_voted_end(user_id, election_id):
     place = models.get_place_where_user_voted(user_id, election_id)[0]
@@ -446,7 +447,7 @@ def know_where_user_voted_end(user_id, election_id):
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(False, True)
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data

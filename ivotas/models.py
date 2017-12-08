@@ -319,19 +319,25 @@ def get_organic_units(type, dep_without_voting_tables):
                     WHERE id=unidade_organica_id
                 '''
         elif dep_without_voting_tables:
+            now = datetime.datetime.now()
             search_statement = '''
                 SELECT distinct(id), nome
                 FROM unidade_organica uo, departamento d, faculdade f
                 WHERE uo.id=f.unidade_organica_id OR uo.id=d.unidade_organica_id
-                AND id != ALL(select unidade_organica_id from mesa_de_voto group by unidade_organica_id)
+                AND id != ALL(
+                    select distinct(mv.unidade_organica_id)
+                    from mesa_de_voto mv, eleicao e
+                    where mv.eleicao_id=e.id and e.fim > timestamp %s
+                )
             '''
+            cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT id, nome
                 FROM unidade_organica
             '''
+            cur.execute(search_statement)
 
-        cur.execute(search_statement)
         organic_units = cur.fetchall()
 
         # close communication with the PostgreSQL database server
@@ -435,7 +441,7 @@ def get_elections(form_friendly, not_happening):
 """
 Get voting tables
 """
-def get_voting_tables(form_friendly):
+def get_voting_tables(form_friendly, to_vote):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -447,12 +453,21 @@ def get_voting_tables(form_friendly):
                 FROM mesa_de_voto mv, eleicao e, unidade_organica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id
             '''
+            cur.execute(search_statement)
+        elif to_vote:
+            now = datetime.datetime.now()
+            search_statement = '''
+                SELECT mv.id, e.nome || ' ' || uo.nome
+                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and e.fim > timestamp %s
+            '''
+            cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT *
                 FROM eleicao
             '''
-        cur.execute(search_statement)
+            cur.execute(search_statement)
         elections = cur.fetchall()
 
         # close communication with the PostgreSQL database server
