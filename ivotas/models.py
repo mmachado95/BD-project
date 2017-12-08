@@ -433,6 +433,32 @@ def get_elections(form_friendly, not_happening):
 
 
 """
+Get elections in the past
+"""
+def get_elections_past():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        now = datetime.datetime.now()
+        search_statement = '''
+            SELECT id, nome
+            FROM eleicao
+            where fim < timestamp %s;
+        '''
+
+        cur.execute(search_statement, (now,))
+        elections = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return elections
+
+
+"""
 Get voting tables
 """
 def get_voting_tables(form_friendly):
@@ -852,17 +878,25 @@ def search_user_by_username_and_password(nome, password):
 """
 Search lists by election id
 """
-def search_lists_of_election(election_id):
+def search_lists_of_election(election_id, form_friendly):
     election_id = str(election_id)
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        search_statement = '''
-            SELECT id, nome
-            FROM lista
-            WHERE eleicao_id=%s
-        '''
+        if form_friendly:
+            search_statement = '''
+                SELECT id, nome
+                FROM lista
+                WHERE eleicao_id=%s
+            '''
+
+        else:
+            search_statement = '''
+                SELECT nome, numero_votos
+                FROM lista
+                WHERE eleicao_id=%s
+            '''
 
         cur.execute(search_statement, (election_id,))
         lists = cur.fetchall()
