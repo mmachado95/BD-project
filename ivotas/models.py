@@ -667,7 +667,7 @@ def search_election(election_id, returns_type):
             '''
         else:
             search_statement = '''
-                SELECT nome, descricao, inicio, fim, tipo
+                SELECT nome, descricao, inicio, fim, tipo, total_votos, votos_brancos, votos_nulos
                 FROM eleicao
                 WHERE id=%s
             '''
@@ -694,7 +694,7 @@ def search_list(list_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, eleicao_id, nome
+            SELECT id, eleicao_id, nome, numero_votos
             FROM lista
             WHERE id=%s
         '''

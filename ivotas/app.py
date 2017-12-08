@@ -523,45 +523,45 @@ def vote(voting_table_id, voting_terminal_id):
         current_time = datetime.fromtimestamp(time.time())
 
         users_votes_in_election = models.check_user_vote_in_election(user_id, election_id)
-        print("****")
-        print(users_votes_in_election)
-        print(users_votes_in_election == [])
-        print("****")
 
         # Election has ended
         if election_end < current_time:
-            print("oooooooooooo")
-            print(election_end)
-            print(current_time)
-            print("oooooooooooo")
             error = 'You cant vote. Election has already ended.'
-
+            return render_template('vote_choose_list.html', form=form, error=error)
         # User has already voted
         elif users_votes_in_election != []:
             error = 'You have already voted in election.'
-
+            return render_template('vote_choose_list.html', form=form, error=error)
         else:
-            print("Entering")
             # Create vote
             models.create_vote(user_id, voting_table_id)
 
-            return redirect(url_for('index'))
+            # update total votes
+            total_votes = int(election[5])
+            total_votes += 1
 
-            """
             # Null Vote
             if list == -1:
-                pass
-
-            # Black vote
+                # update null votes
+                null_votes = int(election[7])
+                null_votes += 1
+                models.update_election(election_id, total_votos=str(total_votes), votos_nulos=str(null_votes))
+            # Blank vote
             elif list == 0:
-                pass
-
+                # update blank votes
+                blank_votes = int(election[6])
+                blank_votes += 1
+                models.update_election(election_id, total_votos=str(total_votes), votos_brancos=str(blank_votes))
             # Counter of list
             else:
-                pass """
-
-
+                list_chosen = models.search_list(list)
+                list_votes = list_chosen[3]
+                list_votes += 1
+                models.update_election(election_id, total_votos=str(total_votes))
+                models.update_list(list, numero_votos=str(list_votes))
+        return redirect(url_for('index'))
     return render_template('vote_choose_list.html', form=form, error=error)
+
 
 
 if __name__ == '__main__':

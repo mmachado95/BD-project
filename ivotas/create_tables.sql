@@ -62,9 +62,7 @@ CREATE TABLE eleicao (
     tipo smallint NOT NULL,
     total_votos integer DEFAULT 0,
     votos_brancos integer DEFAULT 0,
-    percentagem_brancos real DEFAULT 0.0,
     votos_nulos integer DEFAULT 0,
-    percentagem_nulos real DEFAULT 0.0,
     FOREIGN KEY (unidade_organica_id)
       REFERENCES unidade_organica (id)
       ON UPDATE CASCADE ON DELETE CASCADE
