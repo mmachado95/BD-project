@@ -130,17 +130,17 @@ def create_department(name, faculty_id):
 """
 Create new user
 """
-def create_user(organic_unit_id, name, password, contact, address, cc, end_date, type):
+def create_user(organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert user in table
         insert_statement = '''
-            INSERT INTO pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo, administrador)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
-        cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type,))
+        cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin,))
 
         # commit the changes
         get_db('ivotas').commit()
@@ -839,7 +839,7 @@ def search_user(user_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo
+            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador
             FROM pessoa
             WHERE id=%s
         '''
@@ -893,17 +893,24 @@ def search_user_by_fields(field_type, field_text):
 """
 Search person by username and password
 """
-def search_user_by_username_and_password(nome, password):
+def search_user_by_username_and_password(nome, password, is_admin):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
+        user = None
 
-        search_statement = '''
-            SELECT id
-            FROM pessoa
-            WHERE nome=%s AND password=%s
-        '''
-
+        if is_admin:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE nome=%s AND password=%s AND administrador IS TRUE
+            '''
+        else:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE nome=%s AND password=%s
+            '''
         cur.execute(search_statement, (nome, password,))
         user = cur.fetchone()
 
@@ -913,7 +920,6 @@ def search_user_by_username_and_password(nome, password):
         print(error)
     finally:
         return user
-
 
 
 """

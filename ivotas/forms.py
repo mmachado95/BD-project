@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, PasswordField, SelectField, SelectMultipleField, validators
+from wtforms import Form, StringField, PasswordField, BooleanField, SelectField, SelectMultipleField, validators
 from wtforms.fields.html5 import DateField, DateTimeField
 
 
@@ -11,6 +11,7 @@ class RegisterUserForm(Form):
     cc = StringField('cc', [validators.required(), validators.Length(min=1, max=10)])
     end_date = DateField('Data de Validade', [validators.required()], format='%Y-%m-%d')
     type = SelectField(label='Tipo', choices=[(1, 'Professor'), (2, 'Funcionário'), (3, 'Estudante')], coerce=int)
+    is_admin = BooleanField(label='Administrador')
 
 
 class ChooseUserForm(Form):
@@ -26,6 +27,7 @@ class ChangeUserForm(Form):
     cc = StringField('cc', [validators.required(), validators.Length(min=4, max=10)])
     end_date = DateField('Data de Validade', [validators.required()], format='%Y-%m-%d')
     type = SelectField(label='Tipo', choices=[(1, 'Professor'), (2, 'Funcionário'), (3, 'Estudante')], coerce=int)
+    is_admin = BooleanField(label='Administrador')
 
 
 class CreateFacultyForm(Form):
@@ -137,4 +139,4 @@ class IdentifyUserForm(Form):
 
 class AuthenticateUserForm(Form):
     username = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
-    password = StringField('Password', [validators.required(), validators.Length(min=2, max=100)])
+    password = PasswordField('Password', [validators.required(), validators.Length(min=2, max=100)])

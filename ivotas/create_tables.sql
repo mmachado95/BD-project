@@ -44,6 +44,7 @@ CREATE TABLE pessoa (
     cc VARCHAR(10) NOT NULL UNIQUE,
     data_validade date NOT NULL,
     tipo smallint NOT NULL,
+    administrador boolean DEFAULT FALSE,
     FOREIGN KEY (unidade_organica_id)
         REFERENCES unidade_organica (id)
         ON UPDATE CASCADE ON DELETE CASCADE

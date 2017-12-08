@@ -7,6 +7,7 @@ from datetime import datetime
 
 
 app = Flask(__name__)
+app.secret_key = b'\xe0\xbe]\xb3\x1eK"\xf2\xf1\xb9\xd0\xf8\xa8$\xdb\x9b\x89\xc1t>\xed\x86\xa4\x00'
 
 
 """
@@ -26,9 +27,34 @@ def index():
     return render_template('main.html')
 
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    return render_template('admin.html')
+    if 'username' in session:
+        return render_template('admin.html')
+    return redirect(url_for('login_admin'))
+
+@app.route('/login_admin', methods=['GET', 'POST'])
+def login_admin():
+    form = forms.AuthenticateUserForm(request.form)
+    error = None
+
+    if request.method == 'POST' and form.validate():
+        username = form.username.data
+        password = form.password.data
+        user_id = models.search_user_by_username_and_password(username, password, True)
+        if user_id is None:
+            error = 'Authentication failed'
+        else:
+            session['username'] = username
+            return redirect(url_for('admin'))
+
+    return render_template('login_admin.html', form=form, error=error)
+
+
+@app.route("/admin/logout")
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('admin'))
 
 
 @app.route('/create_user', methods=['GET', 'POST'])
@@ -45,8 +71,9 @@ def register_person():
         cc = form.cc.data
         end_date = form.end_date.data
         type = form.type.data
+        is_admin= form.is_admin.data
 
-        models.create_user(organic_unit_id, name, password, contact, address, cc, end_date, type)
+        models.create_user(organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin)
 
         return redirect(url_for('admin'))
     return render_template('register_user.html', form=form)
@@ -69,7 +96,7 @@ def change_person(user_id):
     form = forms.ChangeUserForm(request.form)
 
     # missing validators
-    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data):
+    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
         name = form.name.data
         organic_unit_id = form.organic_unit.data
         contact = form.contact.data
@@ -77,6 +104,7 @@ def change_person(user_id):
         cc = form.cc.data
         end_date = form.end_date.data
         type = form.type.data
+        is_admin = form.is_admin.data
 
         error = models.update_user(
             str(user_id),
@@ -86,7 +114,8 @@ def change_person(user_id):
             morada=address,
             cc=cc,
             data_validade=str(end_date),
-            tipo=str(type)
+            tipo=str(type),
+            administrador=str(is_admin)
         )
         if error:
             user = models.search_user(user_id)
@@ -96,11 +125,11 @@ def change_person(user_id):
             return render_template('change_user.html', form=form, error=error)
 
         return redirect(url_for('admin'))
-    elif form.type.choices is not None:
+    elif form.name.data is not None or form.organic_unit.choices is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
         error = 'Invalid input'
 
     user = models.search_user(user_id)
-    form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7])
+    form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7], is_admin=user[8])
     form.organic_unit.choices = models.get_organic_units(None, None)
     form = utils.set_user_form_values(form, user)
 
@@ -119,7 +148,7 @@ def create_faculty():
     if request.method == 'POST' and form.validate():
         name = form.name.data
         models.create_faculty(name)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
 
     return render_template('faculty_forms.html', form=form, option=1)
 
@@ -133,7 +162,7 @@ def change_faculty():
         id_to_update = form.faculty.data
         new_name = form.new_name.data
         models.update_organic_unit(id_to_update, nome=new_name)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=2)
 
 
@@ -145,7 +174,7 @@ def delete_faculty():
     if request.method == 'POST' and form.validate():
         id_to_delete = form.faculty.data
         models.delete_data('unidade_organica', id_to_delete)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=3)
 
 
@@ -162,7 +191,7 @@ def create_department():
         faculty_id = form.faculty.data
         name = form.name.data
         models.create_department(name, faculty_id)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
 
     return render_template('department_forms.html', form=form, option=1, current_faculty=None, current_name=None)
 
@@ -188,7 +217,7 @@ def change_department(department_id):
         name = form.name.data
         models.update_organic_unit(department_id, nome=name)
         models.update_department(department_id, faculdade_id=str(faculty_id))
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
     elif form.faculty.data != None:
         error = 'Nome inválido'
 
@@ -212,7 +241,7 @@ def delete_department():
     if request.method == 'POST' and form.validate():
         id_to_delete = form.department.data
         models.delete_data('unidade_organica', id_to_delete)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
     return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
 
 
@@ -232,7 +261,7 @@ def create_voting_table():
         election_id = form.election.data
         organic_unit_id = form.organic_unit.data
         models.create_voting_table(election_id, organic_unit_id)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_voting_table'))
 
     return render_template('voting_table_forms.html', form=form, option=1, current_election=None, current_organic_unit=None)
 
@@ -256,7 +285,7 @@ def change_voting_table(voting_table_id):
         election = form.election.data
         organic_unit = form.organic_unit.data
         models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_voting_table'))
 
     # TODO check if field has changed
     voting_table = models.search_voting_table(voting_table_id, True, False)
@@ -412,7 +441,7 @@ def add_candidates(election_id, list_id, list_type):
     if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) > 0:
         candidates = form.candidates.data
         models.add_candidates(list_id, candidates)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_candidate_list'))
 
     form = forms.AddCandidatesForm(request.form)
     election_type = models.search_election(election_id, True)
