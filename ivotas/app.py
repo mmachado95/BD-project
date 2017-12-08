@@ -90,7 +90,7 @@ def change_person(user_id):
         )
         if error:
             user = models.search_user(user_id)
-            form = forms.ChangeUserForm(request.form, organic_unit=user[1])
+            form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7])
             form.organic_unit.choices = models.get_organic_units(None, None)
             form = utils.set_user_form_values(form, user)
             return render_template('change_user.html', form=form, error=error)
@@ -100,7 +100,7 @@ def change_person(user_id):
         error = 'Invalid input'
 
     user = models.search_user(user_id)
-    form = forms.ChangeUserForm(request.form, organic_unit=user[1])
+    form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7])
     form.organic_unit.choices = models.get_organic_units(None, None)
     form = utils.set_user_form_values(form, user)
 
