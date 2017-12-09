@@ -37,6 +37,7 @@ def admin():
         return render_template('admin.html')
     return redirect(url_for('login_admin'))
 
+
 @app.route('/login_admin', methods=['GET', 'POST'])
 def login_admin():
     form = forms.AuthenticateUserForm(request.form)
