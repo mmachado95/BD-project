@@ -902,7 +902,7 @@ def search_user(user_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador
+            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador, password
             FROM Pessoa
             WHERE id=%s
         '''
