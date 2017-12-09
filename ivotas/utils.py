@@ -25,7 +25,7 @@ Safe get  connection to dabase
 def get_db(dbname):
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = connect_db('localhost', dbname, 'Machado', '')
+        db = g._database = connect_db('localhost', dbname, 'ivotasdb-user', '')
     return db
 
 
