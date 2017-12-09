@@ -287,41 +287,6 @@ def create_voting_table():
     return render_template('voting_table_forms.html', form=form, option=1, current_election=None, current_organic_unit=None)
 
 
-@app.route('/manage_voting_table/choose', methods=['GET', 'POST'])
-def choose_voting_table():
-    form = forms.ChooseVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True, False)
-
-    if request.method == 'POST' and form.validate():
-        id_to_update = form.voting_table.data
-        return redirect(url_for('change_voting_table', voting_table_id=id_to_update))
-    return render_template('voting_table_forms.html', form=form, option=2, current_election=None, current_organic_unit=None)
-
-
-@app.route('/manage_voting_table/change/<int:voting_table_id>', methods=['GET', 'POST'])
-def change_voting_table(voting_table_id):
-    form = forms.ChangeVotingTableForm(request.form)
-
-    if request.method == 'POST':
-        election = form.election.data
-        organic_unit = form.organic_unit.data
-        models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
-        return redirect(url_for('manage_voting_table'))
-
-    voting_table = models.search_voting_table(voting_table_id, True, False)
-
-    election_id = voting_table[1]
-    organic_unit_id = voting_table[2]
-    election = voting_table[3]
-    organic_unit = voting_table[4]
-
-    form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
-    form.election.choices = models.get_elections(True, False, False)
-    form.organic_unit.choices = models.get_organic_units(None, True)
-
-    return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
-
-
 @app.route('/manage_voting_table/delete', methods=['GET', 'POST'])
 def delete_voting_table():
     form = forms.DeleteVotingTableForm(request.form)
