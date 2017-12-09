@@ -520,6 +520,32 @@ def know_where_user_voted_end(user_id, election_id):
     return render_template('know_where_user_voted_end.html', place=place)
 
 
+
+
+
+@app.route('/details_of_past_elections', methods=['GET', 'POST'])
+def details_of_past_elections():
+    form = forms.ChooseElectionForm(request.form)
+    form.election.choices = models.get_elections_past()
+
+    if request.method == 'POST' and form.validate():
+        election_id = form.election.data
+        return redirect(url_for('details_of_past_elections_end', election_id=election_id))
+
+    return render_template('details_of_past_elections.html', form=form)
+
+
+@app.route('/details_of_past_elections/election_<int:election_id>', methods=['GET', 'POST'])
+def details_of_past_elections_end(election_id):
+    election = models.search_election(election_id, False)
+    lists = models.search_lists_of_election(election_id, False)
+
+    return render_template('details_of_past_elections_end.html', election=election, lists=lists)
+
+
+
+
+
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
@@ -582,7 +608,7 @@ def vote(voting_table_id, voting_terminal_id):
     election_id = voting_table[1]
 
     # Get lists of election
-    lists = models.search_lists_of_election(election_id)
+    lists = models.search_lists_of_election(election_id, True)
 
     # Append Null and Blank votes
     lists.append((-1, 'Nulo'))
@@ -638,7 +664,6 @@ def vote(voting_table_id, voting_terminal_id):
                 models.update_list(list, numero_votos=str(list_votes))
         return redirect(url_for('index'))
     return render_template('vote_choose_list.html', form=form, error=error)
-
 
 
 if __name__ == '__main__':

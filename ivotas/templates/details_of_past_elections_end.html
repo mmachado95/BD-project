@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p>Results</p>
+  <p>Nome: {{election[0]}}</p>
+  <p>Descrição: {{election[1]}}</p>
+  <p>Número total de votos: {{election[5]}}</p>
+
+  {% for list in lists %}
+    <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
+    {% if list[1] != 0 %}
+      <p>% Votos Lista {{list[0]}}: {{list[1] / election[5] }}</p>
+    {% else %}
+      <p>% Votos Lista {{list[0]}}: {{list[1] }}</p>
+    {% endif %}
+  {% endfor %}
+
+  <p>Número Votos Brancos: {{election[7]}}</p>
+  {% if election[5] != 0 %}
+    <p>% Votos Brancos: {{election[6] / election[5] }}</p>
+  {% else %}
+    <p>% Votos Brancos: {{election[6] }}</p>
+  {% endif %}
+
+  <p>Número Votos Nulos: {{election[7]}}</p>
+  {% if election[5] != 0 %}
+    <p>% Votos Nulos: {{election[7] / election[5] }}</p>
+  {% else %}
+    <p>% Votos Nulos: {{election[7] }}</p>
+  {% endif %}
+
+{% endblock %}
