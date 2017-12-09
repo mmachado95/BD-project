@@ -2,14 +2,17 @@
 {% from "_formhelpers.html" import render_field %}
 
 {% block content %}
-  <p>Hello</p>
-  <form method="post">
-    <dl>
-      {{ render_field(form.list) }}
-    </dl>
-    <p><input type="submit" value="Vote">
-    {% if error %}
-      <p class=error><strong>Error:</strong> {{ error }}
-    {% endif %}
-  </form>
+  <div class="container has-text-centered" style="margin-top:1.5%">
+    <p class="subtitle has-text-centered is-6">VOTE</p>
+    <form method="post" style="margin-top:1%">
+      <dl>
+        {{ render_field(form.list) }}
+      </dl>
+      <input type="submit" value="Votar" class="button is-primary is-medium" style="margin-top:2%"> <br>
+      <a href="{{ url_for('index') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
+      {% if error %}
+        <p class="error"><strong>Error:</strong> {{ error }}
+      {% endif %}
+    </form>
+  </div>
 {% endblock %}

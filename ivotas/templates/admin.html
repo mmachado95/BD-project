@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="container">
-    <a href="{{ url_for('register_person') }}" class="button is-info is-large">Registar Pessoas</a> <br> <br>
-    <a href="{{ url_for('choose_person') }}" class="button is-info is-large">Alterar Pessoas</a> <br> <br>
-    <a href="{{ url_for('manage_faculty') }}" class="button is-info is-large">Gerir Faculdade</a> <br> <br>
-    <a href="{{ url_for('manage_department') }}" class="button is-info is-large">Gerir Departamento</a> <br> <br>
-    <a href="{{ url_for('choose_type') }}" class="button is-info is-large">Criação Eleição</a> <br> <br>
-    <a href="{{ url_for('choose_election') }}" class="button is-info is-large">Alterar Eleição</a> <br> <br>
-    <a href="{{ url_for('manage_candidate_list') }}" class="button is-info is-large">Gerir Lista de Candidatos</a> <br> <br>
-    <a href="{{ url_for('manage_voting_table') }}" class="button is-info is-large">Gerir Mesa de Voto</a> <br> <br>
-    <a href="{{ url_for('know_where_user_voted') }}" class="button is-info is-large">Saber local onde votou cada eleitor</a> <br> <br>
-    <a class="button is-info is-large">Consultar detalhes de Eleições passadas</a> <br> <br>
-    <a href="{{ url_for('logout') }}" class="button is-info is-large">Sair</a> <br> <br>
+  <div class="container has-text-centered" style="margin-top:2%">
+    <a href="{{ url_for('register_person') }}" class="button is-info is-medium">Registar Pessoa</a> <br> <br>
+    <a href="{{ url_for('choose_person') }}" class="button is-info is-medium">Alterar Pessoa</a> <br> <br>
+    <a href="{{ url_for('manage_faculty') }}" class="button is-info is-medium">Gerir Faculdade</a> <br> <br>
+    <a href="{{ url_for('manage_department') }}" class="button is-info is-medium">Gerir Departamento</a> <br> <br>
+    <a href="{{ url_for('choose_type') }}" class="button is-info is-medium">Criar Eleição</a> <br> <br>
+    <a href="{{ url_for('choose_election') }}" class="button is-info is-medium">Alterar Eleição</a> <br> <br>
+    <a href="{{ url_for('manage_candidate_list') }}" class="button is-info is-medium">Gerir Lista de Candidatos</a> <br> <br>
+    <a href="{{ url_for('manage_voting_table') }}" class="button is-info is-medium">Gerir Mesa de Voto</a> <br> <br>
+    <a href="{{ url_for('know_where_user_voted') }}" class="button is-info is-medium">Saber em que Local Votou um Eleitor</a> <br> <br>
+    <a href="{{ url_for('details_of_past_elections') }}" class="button is-info is-medium">Consultar Detalhes de Eleições Passadas</a> <br> <br>
+    <a class="button is-info is-medium">Consultar Estado de Mesas de Voto</a> <br> <br>
+    <a href="{{ url_for('logout') }}" class="button is-danger is-medium" style="margin-top:1%">Logout</a> <br> <br>
   </div>
 {% endblock %}
