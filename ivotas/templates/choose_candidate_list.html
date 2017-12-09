@@ -2,10 +2,14 @@
 {% from "_formhelpers.html" import render_field %}
 
 {% block content %}
-  <form method="post">
-    <dl>
-      {{ render_field(form.list) }}
-    </dl>
-    <p><input type="submit" value="Change">
-  </form>
+  <div class="container has-text-centered" style="margin-top:1.5%">
+    <p class="subtitle has-text-centered is-6">ALTERAR LISTA DE CANDIDATOS</p>
+    <form method="post">
+      <dl>
+        {{ render_field(form.list) }}
+      </dl>
+      <input type="submit" value="Escolher" class="button is-primary is-medium" style="margin-top:2%"> <br>
+      <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
+    </form>
+  </div>
 {% endblock %}
