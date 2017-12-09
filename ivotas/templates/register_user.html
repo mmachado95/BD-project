@@ -10,6 +10,9 @@
       {{ render_field(form.contact) }}
       {{ render_field(form.address) }}
       {{ render_field(form.cc) }}
+      {% if error %}
+        <p>{{error}}</p>
+      {% endif %}
       {{ render_field(form.end_date) }}
       {{ render_field(form.type) }}
       {{ render_field(form.is_admin) }}

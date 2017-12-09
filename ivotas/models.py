@@ -145,14 +145,17 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
         # commit the changes
         get_db('ivotas').commit()
 
-    except psycopg2.DatabaseError as e:
+    except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
+        error = 'That cc already exists'
     else:
         get_db('ivotas').commit()
 
     # close communication with the PostgreSQL database server
     if cur is not None:
         cur.close()
+
+    return error
 
 
 """

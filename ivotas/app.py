@@ -59,6 +59,7 @@ def logout():
 
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
+    error = None
     form = forms.RegisterUserForm(request.form)
     form.organic_unit.choices = models.get_organic_units(None, False)
 
@@ -73,10 +74,21 @@ def register_person():
         type = form.type.data
         is_admin= form.is_admin.data
 
-        models.create_user(organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin)
-
+        error = models.create_user(
+            organic_unit_id,
+            name,
+            password,
+            contact,
+            address,
+            cc,
+            end_date,
+            type,
+            is_admin
+        )
+        if error:
+            return render_template('register_user.html', form=form, error=error)
         return redirect(url_for('admin'))
-    return render_template('register_user.html', form=form)
+    return render_template('register_user.html', form=form, error=error)
 
 
 @app.route('/choose_user', methods=['GET', 'POST'])
