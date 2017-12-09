@@ -2,20 +2,20 @@
 {% from "_formhelpers.html" import render_field %}
 
 {% block content %}
-  <form method="post">
-    <dl>
-      {{ render_field(form.name) }}
-      {{ render_field(form.organic_unit) }}
-      {{ render_field(form.contact) }}
-      {{ render_field(form.address) }}
-      {{ render_field(form.cc) }}
-      {% if error %}
-        <p>{{error}}</p>
-      {% endif %}
-      {{ render_field(form.end_date) }}
-      {{ render_field(form.type) }}
-      {{ render_field(form.is_admin) }}
-    </dl>
-    <p><input type="submit" value="Change">
-  </form>
+<form method="post">
+  {% if error %}
+    <p>{{error}}</p>
+  {% endif %}
+  <dl>
+    {{ render_field(form.name) }}
+    {{ render_field(form.organic_unit) }}
+    {{ render_field(form.contact) }}
+    {{ render_field(form.address) }}
+    {{ render_field(form.cc) }}
+    {{ render_field(form.end_date) }}
+    {{ render_field(form.type) }}
+    {{ render_field(form.is_admin) }}
+  </dl>
+  <p><input type="submit" value="Change">
+</form>
 {% endblock %}
