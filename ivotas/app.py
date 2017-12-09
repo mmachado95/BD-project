@@ -113,8 +113,9 @@ def change_person(user_id):
     form = forms.ChangeUserForm(request.form)
 
     # missing validators
-    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
+    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.password.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
         name = form.name.data
+        password = form.password.data
         organic_unit_id = form.organic_unit.data
         contact = form.contact.data
         address = form.address.data
@@ -126,6 +127,7 @@ def change_person(user_id):
         error = models.update_user(
             str(user_id),
             unidade_organica_id=str(organic_unit_id),
+            password=password,
             nome=name,
             contacto=contact,
             morada=address,
@@ -142,7 +144,7 @@ def change_person(user_id):
             return render_template('change_user.html', form=form, error=error)
 
         return redirect(url_for('admin'))
-    elif form.name.data is not None or form.organic_unit.choices is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
+    elif form.name.data is not None or form.organic_unit.choices is not None or form.password.data is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
         error = 'Invalid input'
 
     user = models.search_user(user_id)
