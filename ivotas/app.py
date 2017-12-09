@@ -221,7 +221,6 @@ def change_department(department_id):
     elif form.faculty.data != None:
         error = 'Nome inválido'
 
-    # TODO optimize this
     department = models.search_department(department_id)
     department_name = department[1]
     faculty_name = models.search_organic_unit(department[0])
@@ -250,7 +249,6 @@ def manage_voting_table():
     return render_template('manage_voting_table.html')
 
 
-# TODO only list organic units it can be place on
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
@@ -287,7 +285,6 @@ def change_voting_table(voting_table_id):
         models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
         return redirect(url_for('manage_voting_table'))
 
-    # TODO check if field has changed
     voting_table = models.search_voting_table(voting_table_id, True, False)
 
     election_id = voting_table[1]
@@ -302,7 +299,6 @@ def change_voting_table(voting_table_id):
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
 
-# TODO Check if election is happening with this voting table
 @app.route('/manage_voting_table/delete', methods=['GET', 'POST'])
 def delete_voting_table():
     form = forms.DeleteVotingTableForm(request.form)
@@ -388,7 +384,6 @@ def manage_candidate_list():
     return render_template('manage_candidate_list.html')
 
 
-#TODO refactor this, old code the candidates error doesnt happen anymore
 @app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
 def create_candidate_list():
     form = forms.CreateCandidateListForm(request.form)
@@ -453,7 +448,6 @@ def add_candidates(election_id, list_id, list_type):
     return render_template('add_candidates.html', form=form)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/choose', methods=['GET', 'POST'])
 def choose_candidate_list():
     form = forms.ChooseCandidateListForm(request.form)
@@ -465,7 +459,6 @@ def choose_candidate_list():
     return render_template('choose_candidate_list.html', form=form)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/change/<int:list_id>', methods=['GET', 'POST'])
 def change_candidate_list(list_id):
     name_error = None
@@ -487,7 +480,6 @@ def change_candidate_list(list_id):
     return render_template('change_candidate_list.html', form=form, error=name_error, list_id=list_id)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/delete', methods=['GET', 'POST'])
 def delete_candidate_list():
     form = forms.DeleteCandidateListForm(request.form)

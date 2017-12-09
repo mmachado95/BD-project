@@ -455,7 +455,6 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
                 FROM eleicao
             '''
             cur.execute(search_statement)
-        # TODO change the logic to happeninbg in other condition
         elif future_elections:
             now = datetime.datetime.now()
             search_statement = '''
