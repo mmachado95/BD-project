@@ -359,12 +359,14 @@ def get_organic_units(type, dep_without_voting_tables):
                     FROM unidade_organica, faculdade
                     WHERE id=unidade_organica_id
                 '''
+                cur.execute(search_statement)
             elif type == 4:
                 search_statement = '''
                     SELECT id, nome
                     FROM unidade_organica, departamento
                     WHERE id=unidade_organica_id
                 '''
+                cur.execute(search_statement)
         elif dep_without_voting_tables:
             now = datetime.datetime.now()
             search_statement = '''
