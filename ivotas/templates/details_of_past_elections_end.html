@@ -1,32 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <p>Results</p>
-  <p>Nome: {{election[0]}}</p>
-  <p>Descrição: {{election[1]}}</p>
-  <p>Número total de votos: {{election[5]}}</p>
+  <div class="container has-text-centered" style="margin-top:1.5%">
+    <p class="subtitle has-text-centered is-6">CONSULTAR DETALHES DE ELEIÇÕES PASSADAS</p>
+    <p class="subtitle has-text-centered is-6">RESULTS</p>
+    <p><strong>Nome:</strong> {{election[0]}}</p>
+    <p><strong>Descrição:</strong> {{election[1]}}</p>
+    <p><strong>Número total de votos:</strong> {{election[5]}}</p>
+    <br><br>
 
-  {% for list in lists %}
-    <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
-    {% if list[1] != 0 %}
-      <p>% Votos Lista {{list[0]}}: {{list[1] / election[5] }}</p>
+    {% for list in lists %}
+      <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
+      {% if list[1] != 0 %}
+        <p>% Votos Lista {{list[0]}}: {{list[1] / election[5] }}</p>
+      {% else %}
+        <p>% Votos Lista {{list[0]}}: {{list[1] }}</p>
+      {% endif %}
+      <br><br>
+    {% endfor %}
+
+
+    <p>Número Votos Brancos: {{election[7]}}</p>
+    {% if election[5] != 0 %}
+      <p>% Votos Brancos: {{election[6] / election[5] }}</p>
     {% else %}
-      <p>% Votos Lista {{list[0]}}: {{list[1] }}</p>
+      <p>% Votos Brancos: {{election[6] }}</p>
+      <br><br>
     {% endif %}
-  {% endfor %}
 
-  <p>Número Votos Brancos: {{election[7]}}</p>
-  {% if election[5] != 0 %}
-    <p>% Votos Brancos: {{election[6] / election[5] }}</p>
-  {% else %}
-    <p>% Votos Brancos: {{election[6] }}</p>
-  {% endif %}
+    <p>Número Votos Nulos: {{election[7]}}</p>
+    {% if election[5] != 0 %}
+      <p>% Votos Nulos: {{election[7] / election[5] }}</p>
+    {% else %}
+      <p>% Votos Nulos: {{election[7] }}</p>
+    {% endif %}
+    <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:2%">Voltar</a>
 
-  <p>Número Votos Nulos: {{election[7]}}</p>
-  {% if election[5] != 0 %}
-    <p>% Votos Nulos: {{election[7] / election[5] }}</p>
-  {% else %}
-    <p>% Votos Nulos: {{election[7] }}</p>
-  {% endif %}
-
+  </div>
 {% endblock %}
