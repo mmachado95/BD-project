@@ -20,10 +20,14 @@ def close_db(exception):
         db.close
 
 
+@app.route("/defesa")
+def defesa():
+    models.create_tables()
+    models.seed_tables()
+
+
 @app.route("/")
 def index():
-    #models.create_tables()
-    #models.seed_tables()
     return render_template('main.html')
 
 
@@ -193,6 +197,7 @@ def delete_faculty():
 @app.route('/manage_department', methods=['GET', 'POST'])
 def manage_department():
     return render_template('manage_organic_unit.html', option='department')
+
 
 @app.route('/manage_department/create', methods=['GET', 'POST'])
 def create_department():
