@@ -389,8 +389,8 @@ def get_organic_units(type, dep_without_voting_tables):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return organic_units
 
 """
@@ -413,8 +413,8 @@ def get_faculties():
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return faculties
 
 
@@ -496,8 +496,8 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
@@ -522,8 +522,8 @@ def get_elections_past():
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
@@ -562,8 +562,8 @@ def get_voting_tables(form_friendly, to_vote):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
@@ -592,8 +592,8 @@ def get_lists(form_friendly):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return lists
 
 
@@ -635,8 +635,8 @@ def get_users(form_friendly, by_type):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return users
 
 
@@ -658,8 +658,8 @@ def get_list_of_candidates(election_id):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return candidates
 
 
