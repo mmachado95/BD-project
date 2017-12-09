@@ -286,6 +286,8 @@ def create_voting_table(election_id, organic_unit_id):
 Create new voting terminal
 """
 def create_voting_terminal(voting_table_id):
+    voting_terminal_id = 0
+
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
@@ -294,6 +296,7 @@ def create_voting_terminal(voting_table_id):
         insert_statement = '''
             INSERT INTO TerminalDeVoto(mesa_de_voto_id)
             VALUES(%s)
+            RETURNING ID
         '''
         cur.execute(insert_statement, (voting_table_id,))
 
@@ -304,10 +307,12 @@ def create_voting_terminal(voting_table_id):
         get_db('ivotas').rollback()
     else:
         get_db('ivotas').commit()
+        voting_terminal_id = cur.fetchone()[0]
 
     # close communication with the PostgreSQL database server
     if cur is not None:
         cur.close()
+    return voting_terminal_id
 
 
 """

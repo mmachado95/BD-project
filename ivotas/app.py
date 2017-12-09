@@ -554,11 +554,11 @@ def identify_user(voting_table_id):
         field = form.field.data
         text = form.text.data
         users_ids = models.search_user_by_fields(field, text)
-        voting_terminal_id = "1"
 
         if users_ids == []:
             error = 'No user found'
         else:
+            voting_terminal_id = models.create_voting_terminal(str(voting_table_id))
             return redirect(url_for('authenticate_user', voting_table_id=voting_table_id, voting_terminal_id=voting_terminal_id, users_ids=users_ids))
 
     return render_template('vote_identify_user.html', form=form, voting_table_id=voting_table_id, error=error)
