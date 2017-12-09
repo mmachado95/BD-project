@@ -24,6 +24,7 @@ def close_db(exception):
 def defesa():
     models.create_tables()
     models.seed_tables()
+    return redirect(url_for('index'))
 
 
 @app.route("/")
@@ -189,6 +190,11 @@ def delete_faculty():
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.faculty.data
+        departments_of_faculty = models.get_departments(str(id_to_delete))
+
+        for department in departments_of_faculty:
+            models.delete_data('unidade_organica', department[0])
+
         models.delete_data('unidade_organica', id_to_delete)
         return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=3)
@@ -216,7 +222,7 @@ def create_department():
 @app.route('/manage_department/choose', methods=['GET', 'POST'])
 def choose_department():
     form = forms.ChooseDepartmentForm(request.form)
-    form.department.choices = models.get_departments()
+    form.department.choices = models.get_departments(None)
 
     if request.method == 'POST' and form.validate():
         id_to_update = form.department.data
@@ -252,7 +258,7 @@ def change_department(department_id):
 @app.route('/manage_department/delete', methods=['GET', 'POST'])
 def delete_department():
     form = forms.DeleteDepartmentForm(request.form)
-    form.department.choices = models.get_departments()
+    form.department.choices = models.get_departments(None)
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.department.data

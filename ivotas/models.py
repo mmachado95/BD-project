@@ -421,25 +421,34 @@ def get_faculties():
 """
 Get departments
 """
-def get_departments():
+def get_departments(of_faculty):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
         # get departments
-        search_statement = '''
-            SELECT id, nome
-            FROM unidade_organica, departamento
-            WHERE id=unidade_organica_id
-        '''
-        cur.execute(search_statement)
+        if of_faculty is not None:
+            search_statement = '''
+                SELECT id
+                FROM unidade_organica, departamento
+                WHERE id=unidade_organica_id AND faculdade_id=%s
+                GROUP BY id
+            '''
+            cur.execute(search_statement, (of_faculty,))
+        else:
+            search_statement = '''
+                SELECT id, nome
+                FROM unidade_organica, departamento
+                WHERE id=unidade_organica_id
+            '''
+            cur.execute(search_statement)
         departments = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return departments
 
 
