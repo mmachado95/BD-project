@@ -61,7 +61,7 @@ class ChangeDepartmentForm(Form):
 class DeleteDepartmentForm(Form):
     department = SelectField(label='Departamento', coerce=int)
 
-# TODO refactor only needs one form
+
 class CreateVotingTableForm(Form):
     election = SelectField(label='Eleição', coerce=int)
     organic_unit = SelectField(label='Unidade Orgânica', coerce=int)
@@ -81,16 +81,16 @@ class DeleteVotingTableForm(Form):
 
 
 class CreateElectionForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
-    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+    description = StringField('Descricao', [validators.required(), validators.Length(min=1, max=100)])
     start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     organic_unit = SelectField(label='Unidade Orgânica', coerce=int)
 
 
 class CreateElectionWithoutOrganicUnitForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
-    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=500)])
     start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
 
@@ -100,14 +100,14 @@ class ChooseElectionForm(Form):
 
 
 class ChangeElectionForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
-    description = StringField('Descricao', [validators.required(), validators.Length(min=4, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+    description = StringField('Descricao', [validators.required(), validators.Length(min=1, max=500)])
     start_date = DateTimeField('Inicio', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
     end_date = DateTimeField('Fim', [validators.required()], format='%Y-%m-%d %HH:%MM:%SS')
 
 
 class CreateCandidateListForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
     election = SelectField(label='Eleição', coerce=int)
 
 
@@ -119,7 +119,7 @@ class ChooseCandidateListForm(Form):
     list = SelectField(label='Lista', coerce=int)
 
 class ChangeCandidateListForm(Form):
-    name = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
+    name = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
     election = SelectField(label='Eleição', coerce=int)
     candidates = SelectMultipleField(label='Candidatos', coerce=int)
 
@@ -134,9 +134,9 @@ class ChooseUserForm(Form):
 
 class IdentifyUserForm(Form):
     field = SelectField(label='Campo', choices=[(1, 'Nome'), (2, 'CC')], coerce=int)
-    text = StringField('Texto', [validators.required(), validators.Length(min=2, max=100)])
+    text = StringField('Texto', [validators.required(), validators.Length(min=1, max=100)])
 
 
 class AuthenticateUserForm(Form):
-    username = StringField('Nome', [validators.required(), validators.Length(min=2, max=100)])
-    password = PasswordField('Password', [validators.required(), validators.Length(min=2, max=100)])
+    username = StringField('Nome', [validators.required(), validators.Length(min=1, max=100)])
+    password = PasswordField('Password', [validators.required(), validators.Length(min=1, max=100)])
