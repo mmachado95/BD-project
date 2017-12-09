@@ -2,7 +2,6 @@ from flask import Flask, request, redirect, render_template, url_for, g, session
 from ivotas import models
 from ivotas import forms
 from ivotas import utils
-import time
 from datetime import datetime
 
 
@@ -611,8 +610,7 @@ def vote(voting_table_id, voting_terminal_id):
 
         election = models.search_election(election_id, False)
         election_end = election[3]
-        current_time = datetime.fromtimestamp(time.time())
-
+        current_time = datetime.now()
         users_votes_in_election = models.check_user_vote_in_election(user_id, election_id)
 
         # Election has ended

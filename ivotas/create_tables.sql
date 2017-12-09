@@ -109,6 +109,7 @@ CREATE TABLE Voto (
     id SERIAL PRIMARY KEY,
     pessoa_id integer NOT NULL,
     mesa_de_voto_id integer NOT NULL,
+    momento timestamp NOT NULL,
     FOREIGN KEY (pessoa_id)
         REFERENCES Pessoa (id)
         ON UPDATE CASCADE ON DELETE CASCADE,

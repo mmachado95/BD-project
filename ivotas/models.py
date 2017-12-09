@@ -1,5 +1,5 @@
 import psycopg2
-import datetime
+from datetime import datetime
 from ivotas.utils import get_db, get_commands, get_search_statement, get_update_statement
 
 
@@ -320,10 +320,11 @@ def create_vote(user_id, voting_table_id):
 
         # insert vote
         insert_statement = '''
-            INSERT INTO Voto(pessoa_id, mesa_de_voto_id)
-            VALUES(%s, %s)
+            INSERT INTO Voto(pessoa_id, mesa_de_voto_id, momento)
+            VALUES(%s, %s, %s)
         '''
-        cur.execute(insert_statement, (user_id, voting_table_id))
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cur.execute(insert_statement, (user_id, voting_table_id, now,))
 
         # commit the changes
         get_db('ivotas').commit()
@@ -368,7 +369,7 @@ def get_organic_units(type, dep_without_voting_tables):
                 '''
                 cur.execute(search_statement)
         elif dep_without_voting_tables:
-            now = datetime.datetime.now()
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             search_statement = '''
                 SELECT distinct(id), nome
                 FROM UnidadeOrganica uo, Departamento d, Faculdade f
@@ -471,7 +472,7 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
             '''
             cur.execute(search_statement)
         elif future_elections:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT id, nome
                 FROM Eleicao
@@ -479,7 +480,7 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
             '''
             cur.execute(search_statement, (now,))
         elif future_and_present_elections:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT id, nome
                 FROM Eleicao
@@ -499,6 +500,7 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
         return []
     else:
         return elections
@@ -512,7 +514,7 @@ def get_elections_past():
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         search_statement = '''
             SELECT id, nome
             FROM Eleicao
@@ -547,7 +549,7 @@ def get_voting_tables(form_friendly, to_vote):
             '''
             cur.execute(search_statement)
         elif to_vote:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT mv.id, e.nome || ' ' || uo.nome
                 FROM MesaDeVoto mv, Eleicao e, UnidadeOrganica uo
