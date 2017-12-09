@@ -2,36 +2,44 @@
 {% from "_formhelpers.html" import render_field %}
 
 {% block content %}
-  {% if option == 1 %}
-    <form method="post">
-      <dl>
-        {{ render_field(form.election) }}
-        {{ render_field(form.organic_unit) }}
-      </dl>
-      <p><input type="submit" value="Create">
-    </form>
-  {% elif option == 2 %}
-    <form method="post">
-      <dl>
-        {{ render_field(form.voting_table) }}
-      </dl>
-      <p><input type="submit" value="Choose">
-    </form>
-  {% elif option == 3 %}
-    <form method="post">
-      <dl>
-        {{ render_field(form.election) }}
-        {{ render_field(form.organic_unit) }}
-      </dl>
-      <p><input type="submit" value="Change">
-    </form>
-  {% else %}
-    <form method="post">
-      <dl>
-        {{ render_field(form.voting_table) }}
-      </dl>
-      <p><input type="submit" value="Delete">
-    </form>
-  {% endif %}
-
+  <div class="container has-text-centered" style="margin-top:1.5%">
+    {% if option == 1 %}
+      <p class="subtitle has-text-centered is-6">CRIAR MESA DE VOTO</p>
+      <form method="post">
+        <dl>
+          {{ render_field(form.election) }}
+          {{ render_field(form.organic_unit) }}
+        </dl>
+        <input type="submit" value="Criar" class="button is-primary is-medium" style="margin-top:2%"> <br>
+        <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
+      </form>
+    {% elif option == 2 %}
+      <p class="subtitle has-text-centered is-6">ESCOLHER MESA DE VOTO</p>
+      <form method="post">
+        <dl>
+          {{ render_field(form.voting_table) }}
+        </dl>
+        <input type="submit" value="Escolher" class="button is-primary is-medium" style="margin-top:2%"> <br>
+        <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
+      </form>
+    {% elif option == 3 %}
+      <p class="subtitle has-text-centered is-6">ALTERAR MESA DE VOTO</p>
+      <form method="post">
+        <dl>
+          {{ render_field(form.election) }}
+          {{ render_field(form.organic_unit) }}
+        </dl>
+        <p><input type="submit" value="Change">
+      </form>
+    {% else %}
+      <p class="subtitle has-text-centered is-6">REMOVER MESA DE VOTO</p>
+      <form method="post">
+        <dl>
+          {{ render_field(form.voting_table) }}
+        </dl>
+        <input type="submit" value="Remover" class="button is-primary is-medium" style="margin-top:2%"> <br>
+        <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
+      </form>
+    {% endif %}
+  </div>
 {% endblock %}
