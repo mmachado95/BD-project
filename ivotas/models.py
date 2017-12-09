@@ -512,6 +512,33 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
 
 
 """
+Get elections happening now
+"""
+def get_elections_present():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get elections
+        now = datetime.datetime.now()
+        search_statement = '''
+            SELECT id, nome
+            FROM eleicao
+            WHERE inicio < timestamp %s AND fim > timestamp %s;
+        '''
+        cur.execute(search_statement, (now, now,))
+
+        elections = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return elections
+
+
+"""
 Get elections in the past
 """
 def get_elections_past():
@@ -725,46 +752,6 @@ def search_department(department_id):
 
 
 """
-Search voting table based on id
-"""
-def search_voting_table(voting_table_id, names, election_date):
-    voting_table_id = str(voting_table_id)
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # search voting_table
-        if names:
-            search_statement = '''
-                SELECT mv.id, mv.eleicao_id, mv.unidade_organica_id, e.nome "Eleicao", uo.nome "Unidade Organica"
-                FROM MesaDeVoto mv, Eleicao e, UnidadeOrganica uo
-                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and mv.id=%s
-            '''
-        elif election_date:
-            search_statement = '''
-                SELECT inicio, fim
-                FROM MesaDeVoto mv, Eleicao e
-                WHERE mv.eleicao_id=e.id and e.id=%s
-            '''
-        else:
-            search_statement = '''
-                SELECT eleicao_id, unidade_organica_id
-                FROM MesaDeVoto
-                WHERE id=%s
-            '''
-
-        cur.execute(search_statement, (voting_table_id,))
-        voting_table = cur.fetchone()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        return voting_table
-
-
-"""
 Search election by id
 """
 def search_election(election_id, returns_type):
@@ -848,6 +835,35 @@ def search_voting_table(voting_table_id):
         print(error)
     finally:
         return voting_table
+
+
+"""
+Search voting tables by election id
+"""
+def search_voting_tables_of_election():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME, COUNT(votes_of_voting_table)
+            FROM (SELECT mv.id MV_ID, e.id E_ID, e.nome E_NOME
+                    FROM eleicao e, MesaDeVoto mv, voto v
+                    WHERE e.id=mv.eleicao_id AND mv.id=v.mesa_de_voto_id
+            ) AS votes_of_voting_table
+            GROUP BY votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME
+            ORDER BY votes_of_voting_table.E_ID
+        '''
+
+        cur.execute(search_statement)
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
 
 
 """

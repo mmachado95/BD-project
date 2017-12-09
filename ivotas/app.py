@@ -508,9 +508,6 @@ def know_where_user_voted_end(user_id, election_id):
     return render_template('know_where_user_voted_end.html', place=place)
 
 
-
-
-
 @app.route('/details_of_past_elections', methods=['GET', 'POST'])
 def details_of_past_elections():
     form = forms.ChooseElectionForm(request.form)
@@ -531,8 +528,16 @@ def details_of_past_elections_end(election_id):
     return render_template('details_of_past_elections_end.html', election=election, lists=lists)
 
 
+@app.route('/voting_table_status', methods=['GET', 'POST'])
+def voting_table_status():
+    voting_tables = models.search_voting_tables_of_election()
+
+    return render_template('voting_table_status.html', voting_tables=voting_tables)
 
 
+
+
+# VOTE PAGES
 
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
