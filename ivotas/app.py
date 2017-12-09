@@ -193,9 +193,9 @@ def delete_faculty():
         departments_of_faculty = models.get_departments(str(id_to_delete))
 
         for department in departments_of_faculty:
-            models.delete_data('unidade_organica', department[0])
+            models.delete_data('UnidadeOrganica', department[0])
 
-        models.delete_data('unidade_organica', id_to_delete)
+        models.delete_data('UnidadeOrganica', id_to_delete)
         return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=3)
 
@@ -241,7 +241,7 @@ def change_department(department_id):
         models.update_organic_unit(department_id, nome=name)
         models.update_department(department_id, faculdade_id=str(faculty_id))
         return redirect(url_for('manage_department'))
-    elif form.faculty.data != None:
+    elif form.faculty.data is not None:
         error = 'Nome inválido'
 
     department = models.search_department(department_id)
@@ -262,7 +262,7 @@ def delete_department():
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.department.data
-        models.delete_data('unidade_organica', id_to_delete)
+        models.delete_data('UnidadeOrganica', id_to_delete)
         return redirect(url_for('manage_department'))
     return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
 
@@ -294,7 +294,7 @@ def delete_voting_table():
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data
-        models.delete_data('mesa_de_voto', voting_table_id)
+        models.delete_data('MesaDeVoto', voting_table_id)
         return redirect(url_for('admin'))
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
@@ -475,7 +475,7 @@ def delete_candidate_list():
 
     if request.method == 'POST' and form.validate():
         list = form.list.data
-        models.delete_data('lista', list)
+        models.delete_data('Lista', list)
         return redirect(url_for('admin'))
     return render_template('delete_candidate_list.html', form=form)
 

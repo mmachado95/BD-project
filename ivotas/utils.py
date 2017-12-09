@@ -68,7 +68,7 @@ def get_update_statement(table, id_to_update, args):
         update_statement += key + '=' + "'" + value + "'"
         first_iter = False
 
-    if table == 'faculdade' or table == 'departamento':
+    if table == 'Faculdade' or table == 'Departamento':
         update_statement += ' WHERE unidade_organica_id=' + "'" + id_to_update + "'"
     else:
         update_statement += ' WHERE id=' + "'" + id_to_update + "'"
@@ -88,13 +88,13 @@ def set_user_form_values(form, user):
 
 
 def validate_user_change(name, contact, address, cc, end_date, type, is_admin):
-    if name is None or (len(name) <= 1 or len(name) >= 100):
+    if name is None or (len(name) < 1 or len(name) >= 100):
         return False
-    if contact is None or (len(contact) <= 1 or len(contact) >= 100):
+    if contact is None or (len(contact) < 1 or len(contact) >= 100):
         return False
-    if address is None or (len(address) <= 1 or len(address) >= 100):
+    if address is None or (len(address) < 1 or len(address) >= 100):
         return False
-    if cc is None or (len(cc) <= 1 or len(cc) >= 10):
+    if cc is None or (len(cc) < 1 or len(cc) >= 10):
         return False
     if end_date is None:
         return False
