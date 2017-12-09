@@ -22,10 +22,14 @@ def create_tables():
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -46,10 +50,14 @@ def seed_tables():
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 #################################
@@ -76,10 +84,14 @@ def create_faculty(name):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -105,34 +117,45 @@ def create_department(name, faculty_id):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
 Create new user
 """
-def create_user(organic_unit_id, name, password, contact, address, cc, end_date, type):
+def create_user(organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin):
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert user in table
         insert_statement = '''
-            INSERT INTO pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo, administrador)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
-        cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type,))
+        cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin,))
 
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+        error = 'That cc already exists'
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+
+    return error
 
 
 """
@@ -160,10 +183,14 @@ def create_election(name, description, start, finished, type, organic_unit):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -188,11 +215,14 @@ def create_list(election_id, name):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
     finally:
+        # close communication with the PostgreSQL database server
+        if cur is not None:
+            cur.close()
         return list_id
 
 
@@ -213,10 +243,14 @@ def add_candidates(list_id, users_ids):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -237,10 +271,14 @@ def create_voting_table(election_id, organic_unit_id):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -261,10 +299,14 @@ def create_voting_terminal(voting_table_id):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -285,10 +327,14 @@ def create_vote(user_id, voting_table_id):
         # commit the changes
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 ########################
@@ -319,26 +365,32 @@ def get_organic_units(type, dep_without_voting_tables):
                     WHERE id=unidade_organica_id
                 '''
         elif dep_without_voting_tables:
+            now = datetime.datetime.now()
             search_statement = '''
                 SELECT distinct(id), nome
                 FROM unidade_organica uo, departamento d, faculdade f
                 WHERE uo.id=f.unidade_organica_id OR uo.id=d.unidade_organica_id
-                AND id != ALL(select unidade_organica_id from mesa_de_voto group by unidade_organica_id)
+                AND id != ALL(
+                    select distinct(mv.unidade_organica_id)
+                    from mesa_de_voto mv, eleicao e
+                    where mv.eleicao_id=e.id and e.fim > timestamp %s
+                )
             '''
+            cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT id, nome
                 FROM unidade_organica
             '''
+            cur.execute(search_statement)
 
-        cur.execute(search_statement)
         organic_units = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return organic_units
 
 """
@@ -361,40 +413,49 @@ def get_faculties():
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return faculties
 
 
 """
 Get departments
 """
-def get_departments():
+def get_departments(of_faculty):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
 
         # get departments
-        search_statement = '''
-            SELECT id, nome
-            FROM unidade_organica, departamento
-            WHERE id=unidade_organica_id
-        '''
-        cur.execute(search_statement)
+        if of_faculty is not None:
+            search_statement = '''
+                SELECT id
+                FROM unidade_organica, departamento
+                WHERE id=unidade_organica_id AND faculdade_id=%s
+                GROUP BY id
+            '''
+            cur.execute(search_statement, (of_faculty,))
+        else:
+            search_statement = '''
+                SELECT id, nome
+                FROM unidade_organica, departamento
+                WHERE id=unidade_organica_id
+            '''
+            cur.execute(search_statement)
         departments = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return departments
 
 
 """
 Get elections
 """
-def get_elections(form_friendly, not_happening):
+def get_elections(form_friendly, future_elections, future_and_present_elections):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -406,7 +467,7 @@ def get_elections(form_friendly, not_happening):
                 FROM eleicao
             '''
             cur.execute(search_statement)
-        elif not_happening:
+        elif future_elections:
             now = datetime.datetime.now()
             search_statement = '''
                 SELECT id, nome
@@ -414,6 +475,14 @@ def get_elections(form_friendly, not_happening):
                 where inicio > timestamp %s;
             '''
             cur.execute(search_statement, (now,))
+        elif future_and_present_elections:
+            now = datetime.datetime.now()
+            search_statement = '''
+                SELECT id, nome
+                FROM eleicao
+                where inicio > timestamp %s or fim > timestamp %s;
+            '''
+            cur.execute(search_statement, (now, now,))
         else:
             search_statement = '''
                 SELECT *
@@ -427,8 +496,8 @@ def get_elections(form_friendly, not_happening):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
@@ -453,15 +522,15 @@ def get_elections_past():
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
 """
 Get voting tables
 """
-def get_voting_tables(form_friendly):
+def get_voting_tables(form_friendly, to_vote):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
@@ -473,19 +542,28 @@ def get_voting_tables(form_friendly):
                 FROM mesa_de_voto mv, eleicao e, unidade_organica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id
             '''
+            cur.execute(search_statement)
+        elif to_vote:
+            now = datetime.datetime.now()
+            search_statement = '''
+                SELECT mv.id, e.nome || ' ' || uo.nome
+                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and e.fim > timestamp %s
+            '''
+            cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT *
                 FROM eleicao
             '''
-        cur.execute(search_statement)
+            cur.execute(search_statement)
         elections = cur.fetchall()
 
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return elections
 
 
@@ -514,8 +592,8 @@ def get_lists(form_friendly):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return lists
 
 
@@ -557,8 +635,8 @@ def get_users(form_friendly, by_type):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return users
 
 
@@ -580,8 +658,8 @@ def get_list_of_candidates(election_id):
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
+        return []
+    else:
         return candidates
 
 
@@ -798,7 +876,7 @@ def search_user(user_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, nome
+            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador
             FROM pessoa
             WHERE id=%s
         '''
@@ -852,17 +930,24 @@ def search_user_by_fields(field_type, field_text):
 """
 Search person by username and password
 """
-def search_user_by_username_and_password(nome, password):
+def search_user_by_username_and_password(nome, password, is_admin):
     try:
         # connect to database
         cur = get_db('ivotas').cursor()
+        user = None
 
-        search_statement = '''
-            SELECT id
-            FROM pessoa
-            WHERE nome=%s AND password=%s
-        '''
-
+        if is_admin:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE nome=%s AND password=%s AND administrador IS TRUE
+            '''
+        else:
+            search_statement = '''
+                SELECT id
+                FROM pessoa
+                WHERE nome=%s AND password=%s
+            '''
         cur.execute(search_statement, (nome, password,))
         user = cur.fetchone()
 
@@ -872,7 +957,6 @@ def search_user_by_username_and_password(nome, password):
         print(error)
     finally:
         return user
-
 
 
 """
@@ -956,10 +1040,14 @@ def update_organic_unit(id_to_update, **kwargs):
         # commit change
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -978,10 +1066,14 @@ def update_department(id_to_update, **kwargs):
         # commit change
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -989,21 +1081,27 @@ Update user
 """
 def update_user(id_to_update, **kwargs):
     id_to_update = str(id_to_update)
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
+    error = None
 
+    # connect to database
+    cur = get_db('ivotas').cursor()
+
+    try:
         # update user
         update_statement = get_update_statement('pessoa', id_to_update, kwargs)
         cur.execute(update_statement)
 
-        # commit change
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+        error = 'That cc already exists'
+    else:
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+
+    return error
 
 
 """
@@ -1022,10 +1120,14 @@ def update_election(id_to_update, **kwargs):
         # commit change
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -1044,10 +1146,14 @@ def update_list(id_to_update, **kwargs):
         # commit change
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 """
@@ -1068,8 +1174,14 @@ def update_voting_table(id_to_update, **kwargs):
 
         # close communication with the PostgreSQL database server
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+    except psycopg2.IntegrityError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
+        cur.close()
 
 
 ########################
@@ -1094,10 +1206,14 @@ def delete_data(table, id_to_delete):
         # commit change
         get_db('ivotas').commit()
 
-        # close communication with the PostgreSQL database server
+    except psycopg2.DatabaseError as e:
+        get_db('ivotas').rollback()
+    else:
+        get_db('ivotas').commit()
+
+    # close communication with the PostgreSQL database server
+    if cur is not None:
         cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
 
 
 def check_user_vote_in_election(user_id, election_id):
@@ -1115,9 +1231,6 @@ def check_user_vote_in_election(user_id, election_id):
 
         cur.execute(search_statement, (user_id, election_id,))
         users = cur.fetchall()
-        print("_______")
-        print(users)
-        print("_______")
 
         # close communication with the PostgreSQL database server
         cur.close()

@@ -1,11 +1,13 @@
 from flask import Flask, request, redirect, render_template, url_for, g, session
 from ivotas import models
 from ivotas import forms
+from ivotas import utils
 import time
 from datetime import datetime
 
 
 app = Flask(__name__)
+app.secret_key = b'\xe0\xbe]\xb3\x1eK"\xf2\xf1\xb9\xd0\xf8\xa8$\xdb\x9b\x89\xc1t>\xed\x86\xa4\x00'
 
 
 """
@@ -18,20 +20,51 @@ def close_db(exception):
         db.close
 
 
+@app.route("/defesa")
+def defesa():
+    models.create_tables()
+    models.seed_tables()
+    return redirect(url_for('index'))
+
+
 @app.route("/")
 def index():
-    #models.create_tables()
-    #models.seed_tables()
     return render_template('main.html')
 
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    return render_template('admin.html')
+    if 'username' in session:
+        return render_template('admin.html')
+    return redirect(url_for('login_admin'))
+
+@app.route('/login_admin', methods=['GET', 'POST'])
+def login_admin():
+    form = forms.AuthenticateUserForm(request.form)
+    error = None
+
+    if request.method == 'POST' and form.validate():
+        username = form.username.data
+        password = form.password.data
+        user_id = models.search_user_by_username_and_password(username, password, True)
+        if user_id is None:
+            error = 'Authentication failed'
+        else:
+            session['username'] = username
+            return redirect(url_for('admin'))
+
+    return render_template('login_admin.html', form=form, error=error)
+
+
+@app.route("/admin/logout")
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('admin'))
 
 
 @app.route('/create_user', methods=['GET', 'POST'])
 def register_person():
+    error = None
     form = forms.RegisterUserForm(request.form)
     form.organic_unit.choices = models.get_organic_units(None, False)
 
@@ -44,11 +77,80 @@ def register_person():
         cc = form.cc.data
         end_date = form.end_date.data
         type = form.type.data
+        is_admin= form.is_admin.data
 
-        models.create_user(organic_unit_id, name, password, contact, address, cc, end_date, type)
+        error = models.create_user(
+            organic_unit_id,
+            name,
+            password,
+            contact,
+            address,
+            cc,
+            end_date,
+            type,
+            is_admin
+        )
+        if error:
+            return render_template('register_user.html', form=form, error=error)
+        return redirect(url_for('admin'))
+    return render_template('register_user.html', form=form, error=error)
+
+
+@app.route('/choose_user', methods=['GET', 'POST'])
+def choose_person():
+    form = forms.ChooseUserForm(request.form)
+    form.user.choices = models.get_users(True, {'status': False})
+
+    if request.method == 'POST' and form.validate():
+        user = form.user.data
+        return redirect(url_for('change_person', user_id=user))
+    return render_template('choose_user.html', form=form)
+
+
+@app.route('/change_user/<int:user_id>', methods=['GET', 'POST'])
+def change_person(user_id):
+    error = None
+    form = forms.ChangeUserForm(request.form)
+
+    # missing validators
+    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
+        name = form.name.data
+        organic_unit_id = form.organic_unit.data
+        contact = form.contact.data
+        address = form.address.data
+        cc = form.cc.data
+        end_date = form.end_date.data
+        type = form.type.data
+        is_admin = form.is_admin.data
+
+        error = models.update_user(
+            str(user_id),
+            unidade_organica_id=str(organic_unit_id),
+            nome=name,
+            contacto=contact,
+            morada=address,
+            cc=cc,
+            data_validade=str(end_date),
+            tipo=str(type),
+            administrador=str(is_admin)
+        )
+        if error:
+            user = models.search_user(user_id)
+            form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7])
+            form.organic_unit.choices = models.get_organic_units(None, None)
+            form = utils.set_user_form_values(form, user)
+            return render_template('change_user.html', form=form, error=error)
 
         return redirect(url_for('admin'))
-    return render_template('register_user.html', form=form)
+    elif form.name.data is not None or form.organic_unit.choices is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
+        error = 'Invalid input'
+
+    user = models.search_user(user_id)
+    form = forms.ChangeUserForm(request.form, organic_unit=user[1], type=user[7], is_admin=user[8])
+    form.organic_unit.choices = models.get_organic_units(None, None)
+    form = utils.set_user_form_values(form, user)
+
+    return render_template('change_user.html', form=form, error=error)
 
 
 @app.route('/manage_faculty', methods=['GET', 'POST'])
@@ -63,7 +165,7 @@ def create_faculty():
     if request.method == 'POST' and form.validate():
         name = form.name.data
         models.create_faculty(name)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
 
     return render_template('faculty_forms.html', form=form, option=1)
 
@@ -77,7 +179,7 @@ def change_faculty():
         id_to_update = form.faculty.data
         new_name = form.new_name.data
         models.update_organic_unit(id_to_update, nome=new_name)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=2)
 
 
@@ -88,14 +190,20 @@ def delete_faculty():
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.faculty.data
+        departments_of_faculty = models.get_departments(str(id_to_delete))
+
+        for department in departments_of_faculty:
+            models.delete_data('unidade_organica', department[0])
+
         models.delete_data('unidade_organica', id_to_delete)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=3)
 
 
 @app.route('/manage_department', methods=['GET', 'POST'])
 def manage_department():
     return render_template('manage_organic_unit.html', option='department')
+
 
 @app.route('/manage_department/create', methods=['GET', 'POST'])
 def create_department():
@@ -106,7 +214,7 @@ def create_department():
         faculty_id = form.faculty.data
         name = form.name.data
         models.create_department(name, faculty_id)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
 
     return render_template('department_forms.html', form=form, option=1, current_faculty=None, current_name=None)
 
@@ -114,7 +222,7 @@ def create_department():
 @app.route('/manage_department/choose', methods=['GET', 'POST'])
 def choose_department():
     form = forms.ChooseDepartmentForm(request.form)
-    form.department.choices = models.get_departments()
+    form.department.choices = models.get_departments(None)
 
     if request.method == 'POST' and form.validate():
         id_to_update = form.department.data
@@ -132,11 +240,10 @@ def change_department(department_id):
         name = form.name.data
         models.update_organic_unit(department_id, nome=name)
         models.update_department(department_id, faculdade_id=str(faculty_id))
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
     elif form.faculty.data != None:
         error = 'Nome inválido'
 
-    # TODO optimize this
     department = models.search_department(department_id)
     department_name = department[1]
     faculty_name = models.search_organic_unit(department[0])
@@ -151,12 +258,12 @@ def change_department(department_id):
 @app.route('/manage_department/delete', methods=['GET', 'POST'])
 def delete_department():
     form = forms.DeleteDepartmentForm(request.form)
-    form.department.choices = models.get_departments()
+    form.department.choices = models.get_departments(None)
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.department.data
         models.delete_data('unidade_organica', id_to_delete)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_department'))
     return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
 
 
@@ -165,18 +272,17 @@ def manage_voting_table():
     return render_template('manage_voting_table.html')
 
 
-# TODO only list organic units it can be place on
 @app.route('/manage_voting_table/create', methods=['GET', 'POST'])
 def create_voting_table():
     form = forms.CreateVotingTableForm(request.form)
-    form.election.choices = models.get_elections(True, False)
+    form.election.choices = models.get_elections(False, False, True)
     form.organic_unit.choices = models.get_organic_units(None, True)
 
     if request.method == 'POST' and form.validate():
         election_id = form.election.data
         organic_unit_id = form.organic_unit.data
         models.create_voting_table(election_id, organic_unit_id)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_voting_table'))
 
     return render_template('voting_table_forms.html', form=form, option=1, current_election=None, current_organic_unit=None)
 
@@ -184,7 +290,7 @@ def create_voting_table():
 @app.route('/manage_voting_table/choose', methods=['GET', 'POST'])
 def choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(True, False)
 
     if request.method == 'POST' and form.validate():
         id_to_update = form.voting_table.data
@@ -194,16 +300,14 @@ def choose_voting_table():
 
 @app.route('/manage_voting_table/change/<int:voting_table_id>', methods=['GET', 'POST'])
 def change_voting_table(voting_table_id):
-    # TODO normalmente valida-se mas neste caso nçao deixa idk why
     form = forms.ChangeVotingTableForm(request.form)
 
     if request.method == 'POST':
         election = form.election.data
         organic_unit = form.organic_unit.data
         models.update_voting_table(voting_table_id, eleicao_id=str(election), unidade_organica_id=str(organic_unit))
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_voting_table'))
 
-    # TODO check if field has changed
     voting_table = models.search_voting_table(voting_table_id, True, False)
 
     election_id = voting_table[1]
@@ -212,17 +316,16 @@ def change_voting_table(voting_table_id):
     organic_unit = voting_table[4]
 
     form = forms.ChangeVotingTableForm(election=election_id, organic_unit=organic_unit_id)
-    form.election.choices = models.get_elections(True, False)
+    form.election.choices = models.get_elections(True, False, False)
     form.organic_unit.choices = models.get_organic_units(None, True)
 
     return render_template('voting_table_forms.html', form=form, option=3, current_election=election, current_organic_unit=organic_unit)
 
 
-# TODO Check if election is happening with this voting table
 @app.route('/manage_voting_table/delete', methods=['GET', 'POST'])
 def delete_voting_table():
     form = forms.DeleteVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(True, False)
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data
@@ -266,7 +369,7 @@ def create_election(type):
 @app.route('/election/choose', methods=['GET', 'POST'])
 def choose_election():
     form = forms.ChooseElectionForm(request.form)
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
 
     if request.method == 'POST' and form.validate():
         election = form.election.data
@@ -304,7 +407,6 @@ def manage_candidate_list():
     return render_template('manage_candidate_list.html')
 
 
-#TODO refactor this, old code the candidates error doesnt happen anymore
 @app.route('/manage_candidate_list/create', methods=['GET', 'POST'])
 def create_candidate_list():
     form = forms.CreateCandidateListForm(request.form)
@@ -322,7 +424,7 @@ def create_candidate_list():
         if form.name.data is not None and (len(form.name.data) <= 0 or len(form.name.data) >= 100):
             name_error = 'Invalid Name'
 
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
     return render_template('create_candidate_list.html', form=form, name_error=name_error)
 
 
@@ -357,7 +459,7 @@ def add_candidates(election_id, list_id, list_type):
     if request.method == 'POST' and form.candidates.data != None and len(form.candidates.data) > 0:
         candidates = form.candidates.data
         models.add_candidates(list_id, candidates)
-        return redirect(url_for('admin'))
+        return redirect(url_for('manage_candidate_list'))
 
     form = forms.AddCandidatesForm(request.form)
     election_type = models.search_election(election_id, True)
@@ -369,7 +471,6 @@ def add_candidates(election_id, list_id, list_type):
     return render_template('add_candidates.html', form=form)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/choose', methods=['GET', 'POST'])
 def choose_candidate_list():
     form = forms.ChooseCandidateListForm(request.form)
@@ -381,7 +482,6 @@ def choose_candidate_list():
     return render_template('choose_candidate_list.html', form=form)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/change/<int:list_id>', methods=['GET', 'POST'])
 def change_candidate_list(list_id):
     name_error = None
@@ -397,13 +497,12 @@ def change_candidate_list(list_id):
 
     list = models.search_list(list_id)
     form = forms.ChangeCandidateListForm(request.form, election=list[1])
-    form.election.choices = models.get_elections(False, True)
+    form.election.choices = models.get_elections(False, True, False)
     form.name.data = list[2]
 
     return render_template('change_candidate_list.html', form=form, error=name_error, list_id=list_id)
 
 
-# TODO only allow selecting lists on elections that aren't happening
 @app.route('/manage_candidate_list/delete', methods=['GET', 'POST'])
 def delete_candidate_list():
     form = forms.DeleteCandidateListForm(request.form)
@@ -436,6 +535,7 @@ def know_where_user_voted_choose_election(user_id):
         election_id = form.election.data
         return redirect(url_for('know_where_user_voted_end', user_id=user_id, election_id=election_id))
     return render_template('know_where_user_voted_choose_election.html', form=form)
+
 
 @app.route('/know_where_user_voted/user_<int:user_id>/election_<int:election_id>', methods=['GET', 'POST'])
 def know_where_user_voted_end(user_id, election_id):
@@ -472,7 +572,7 @@ def details_of_past_elections_end(election_id):
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
     form = forms.ChooseVotingTableForm(request.form)
-    form.voting_table.choices = models.get_voting_tables(True)
+    form.voting_table.choices = models.get_voting_tables(False, True)
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data
@@ -509,7 +609,7 @@ def authenticate_user(voting_table_id, voting_terminal_id):
     if request.method == 'POST' and form.validate():
         username = form.username.data
         password = form.password.data
-        user_id = models.search_user_by_username_and_password(username, password)
+        user_id = models.search_user_by_username_and_password(username, password, False)
         if user_id == None:
             error = 'Authentication failed'
         elif user_id[0] in users_ids:
