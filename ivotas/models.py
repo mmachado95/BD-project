@@ -131,6 +131,7 @@ def create_department(name, faculty_id):
 Create new user
 """
 def create_user(organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin):
+    error = None
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
