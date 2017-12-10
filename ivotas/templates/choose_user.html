@@ -6,6 +6,9 @@
     <p class="subtitle has-text-centered is-6">ALTERAR PESSOA</p>
     <form method="post" style="margin-top:1%">
       <dl>
+        {% if name_error %}
+          <p>{{ name_error }}</p>
+        {% endif %}
         {{ render_field(form.user) }}
       </dl>
       <input type="submit" value="Alterar" class="button is-primary is-medium" style="margin-top:2%"> <br>

@@ -1029,7 +1029,7 @@ def get_place_where_user_voted(user_id, election_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT uo.nome
+            SELECT uo.nome, v.momento
             FROM UnidadeOrganica uo, Eleicao e, MesaDeVoto mv, Voto v, Pessoa p
             WHERE mv.eleicao_id=e.id AND mv.id=v.mesa_de_voto_id AND mv.unidade_organica_id=uo.id AND v.pessoa_id=p.id AND p.id=%s AND e.id=%s
         '''

@@ -3,13 +3,13 @@
 
 {% block content %}
   <div class="container has-text-centered" style="margin-top:1.5%">
-    <p class="subtitle has-text-centered is-6">IDENTIQUE-SE</p>
+    <p class="subtitle has-text-centered is-6">IDENTIFIQUE-SE</p>
     <form method="post" style="margin-top:1%">
       <dl>
         {{ render_field(form.field) }}
         {{ render_field(form.text) }}
       </dl>
-      <input type="submit" value="Seguinte" class="button is-primary is-medium" style="margin-top:2%"> <br>
+      <input type="submit" value="Seguinte" class="button is-warning is-medium" style="margin-top:2%"> <br>
       <a href="{{ url_for('index') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
     </form>
     {% if error %}
