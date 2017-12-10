@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container has-text-centered" style="margin-top:1.5%">
+    <p class="subtitle has-text-centered is-6" style="margin-bottom:4%">CONSULTAR DETALHES DE ELEIÇÕES PASSADAS</p>
+    <p><strong>Nome:</strong> {{election[0]}}</p>
+    <p><strong>Descrição:</strong> {{election[1]}}</p>
+    <p><strong>Número total de votos:</strong> {{election[5]}}</p>
+    <br><br>
+
+    {% for list in lists_of_alunos %}
+      <p><strong>ALUNOS</strong></p>
+      <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
+      {% if list[1] != 0 %}
+        <p>% Votos Lista {{list[0]}}: {{ (list[1] / election[5]) * 100 }}</p>
+      {% else %}
+        <p>% Votos Lista {{list[0]}}: {{ list[1] }}</p>
+      {% endif %}
+      <br><br>
+    {% endfor %}
+
+    {% for list in lists_of_docentes %}
+      <p><strong>DOCENTES</strong></p>
+      <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
+      {% if list[1] != 0 %}
+        <p>% Votos Lista {{list[0]}}: {{ (list[1] / election[5]) * 100 }}</p>
+      {% else %}
+        <p>% Votos Lista {{list[0]}}: {{ list[1] }}</p>
+      {% endif %}
+      <br><br>
+    {% endfor %}
+
+    {% for list in lists_of_funcionarios %}
+      <p><strong>FUNCIONARIOS</strong></p>
+      <p>Número Votos Lista {{list[0]}}: {{list[1]}}</p>
+      {% if list[1] != 0 %}
+        <p>% Votos Lista {{list[0]}}: {{ (list[1] / election[5]) * 100 }}</p>
+      {% else %}
+        <p>% Votos Lista {{list[0]}}: {{ list[1] }}</p>
+      {% endif %}
+      <br><br>
+    {% endfor %}
+
+
+    <p>Número Votos Brancos: {{election[7]}}</p>
+    {% if election[5] != 0 %}
+      <p>% Votos Brancos: {{ (election[6] / election[5]) * 100 }}</p>
+    {% else %}
+      <p>% Votos Brancos: {{election[6] }}</p>
+    {% endif %}
+
+    <br><br>
+
+    <p>Número Votos Nulos: {{election[7]}}</p>
+    {% if election[5] != 0 %}
+      <p>% Votos Nulos: {{ (election[7] / election[5]) * 100 }}</p>
+    {% else %}
+      <p>% Votos Nulos: {{ election[7] }}</p>
+    {% endif %}
+    <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:2%">Voltar</a>
+
+  </div>
+{% endblock %}
