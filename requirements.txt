@@ -4,7 +4,7 @@ Faker==0.8.7
 flake8==3.5.0
 Flask==0.12.2
 itsdangerous==0.24
--e git+git@github.com:Kabombom/BD-project.git@8929f0bd2b42d7db952eef003030cbc03d6db6f6#egg=ivotas
+-e git+git@github.com:Kabombom/BD-project.git@7d4a31eb2b0031f7d60feb79edadc88ed5b6e61b#egg=ivotas
 Jinja2==2.10
 MarkupSafe==1.0
 mccabe==0.6.1
