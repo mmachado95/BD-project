@@ -737,7 +737,7 @@ def search_election(election_id, returns_type):
             '''
         else:
             search_statement = '''
-                SELECT nome, descricao, inicio, fim, tipo, total_votos, votos_brancos, votos_nulos
+                SELECT nome, descricao, inicio, fim, tipo, total_votos, votos_brancos, votos_nulos, unidade_organica_id
                 FROM Eleicao
                 WHERE id=%s
             '''
