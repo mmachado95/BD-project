@@ -607,8 +607,10 @@ def authenticate_user(voting_table_id, voting_terminal_id):
     return render_template('vote_authenticate_user.html', form=form, error=error)
 
 
-def user_can_vote(user_type, election_type):
+def user_can_vote(user_type, user_organic_unit, election_type, election_organic_unit):
     if user_type == 1 and election_type == 2:
+        return False
+    if user_type == 1 and election_type == 4 and user_organic_unit != election_organic_unit:
         return False
     if user_type == 2 and election_type != 1:
         return False
@@ -630,7 +632,9 @@ def vote(voting_table_id, voting_terminal_id):
     election_type = election[4]
 
     # Get user type
-    user_type = models.search_user(user_id)[7]
+    user = models.search_user(user_id)
+    user_organic_unit = user[1]
+    user_type = user[7]
 
     # Get lists of election
     if election_type == 1:
@@ -662,8 +666,7 @@ def vote(voting_table_id, voting_terminal_id):
             error = 'You have already voted in election.'
             return render_template('vote_choose_list.html', form=form, error=error)
         # User can't vote on this election
-        elif not user_can_vote(user_type, election_type):
-            print("entered here")
+        elif not user_can_vote(user_type, user_organic_unit, election_type, election[8]):
             error = 'You can´t vote in this election'
             return render_template('vote_choose_list.html', form=form, error=error)
         else:
