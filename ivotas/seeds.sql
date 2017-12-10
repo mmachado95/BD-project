@@ -109,6 +109,8 @@ INSERT INTO Voto(pessoa_id, mesa_de_voto_id, momento)
 VALUES
   (3, 1, '2017-11-20 22:00:03'), -- aluno a votar em branco
   (4, 1, '2017-11-20 22:00:04'), -- aluno a votar em nulo
+  (3, 1, '2017-11-20 22:00:03'), -- aluno a votar em branco
+  (4, 1, '2017-11-20 22:00:04'), -- aluno a votar em nulo
   (10, 2, '2017-11-20 22:00:04'), -- docente a votar em lista
   (14, 2, '2017-11-20 22:00:04'), -- funcionario a votar em lista
   (5, 2, '2017-11-20 22:00:04'), -- aluno a votar em lista

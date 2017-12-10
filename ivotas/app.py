@@ -507,6 +507,9 @@ def know_where_user_voted_choose_election(user_id):
 @app.route('/know_where_user_voted/user_<int:user_id>/election_<int:election_id>', methods=['GET', 'POST'])
 def know_where_user_voted_end(user_id, election_id):
     res = models.get_place_where_user_voted(user_id, election_id)
+    print(user_id)
+    print(election_id)
+    print(res)
     place = res[0]
     moment = res[1]
     return render_template('know_where_user_voted_end.html', place=place, moment=moment)
