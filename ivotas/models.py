@@ -847,7 +847,7 @@ def search_elections_that_user_voted(user_id):
         search_statement = '''
             SELECT e.id, e.nome
             FROM Eleicao e, MesaDeVoto mv, Pessoa p, Voto v
-            WHERE p.id=%s AND p.id=v.id AND v.mesa_de_voto_id=mv.id and mv.eleicao_id=e.id
+            WHERE p.id=%s AND p.id=v.pessoa_id AND v.mesa_de_voto_id=mv.id AND mv.eleicao_id=e.id
         '''
 
         cur.execute(search_statement, (user_id,))
