@@ -595,6 +595,16 @@ def authenticate_user(voting_table_id, voting_terminal_id):
     return render_template('vote_authenticate_user.html', form=form, error=error)
 
 
+def user_can_vote(user_type, election_type):
+    if user_type == 1 and election_type == 2:
+        return False
+    if user_type == 2 and election_type != 1:
+        return False
+    if user_type == 3 and election_type != 1 and election_type != 2:
+        return False
+    return True
+
+
 @app.route('/voting_table_<int:voting_table_id>/voting_terminal_<int:voting_terminal_id>/vote', methods=['GET', 'POST'])
 def vote(voting_table_id, voting_terminal_id):
     user_id = eval(request.args.get('user_id'))
@@ -603,9 +613,18 @@ def vote(voting_table_id, voting_terminal_id):
 
     # Get Election id
     election_id = voting_table[1]
+    election = models.search_election(election_id, False)
+    election_end = election[3]
+    election_type = election[4]
+
+    # Get user type
+    user_type = models.search_user(user_id)[7]
 
     # Get lists of election
-    lists = models.search_lists_of_election(election_id, True)
+    if election_type == 1:
+        lists = models.search_candidates_lists_by_type(election_id, user_type)
+    else:
+        lists = models.search_lists_of_election(election_id, True)
 
     # Append Null and Blank votes
     lists.append((-1, 'Nulo'))
@@ -618,10 +637,9 @@ def vote(voting_table_id, voting_terminal_id):
     if request.method == 'POST' and form.validate():
         list = form.list.data
 
-        election = models.search_election(election_id, False)
-        election_end = election[3]
-        current_time = datetime.now()
         users_votes_in_election = models.check_user_vote_in_election(user_id, election_id)
+
+        current_time = datetime.now()
 
         # Election has ended
         if election_end < current_time:
@@ -630,6 +648,11 @@ def vote(voting_table_id, voting_terminal_id):
         # User has already voted
         elif users_votes_in_election != []:
             error = 'You have already voted in election.'
+            return render_template('vote_choose_list.html', form=form, error=error)
+        # User can't vote on this election
+        elif not user_can_vote(user_type, election_type):
+            print("entered here")
+            error = 'You can´t vote in this election'
             return render_template('vote_choose_list.html', form=form, error=error)
         else:
             # Create vote

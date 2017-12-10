@@ -1020,6 +1020,32 @@ def search_lists_of_election(election_id, form_friendly):
 
 
 """
+Search lists of candidates
+"""
+def search_candidates_lists_by_type(election_id, user_type):
+    election_id = str(election_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT distinct(l.id), l.nome
+            FROM Pessoa p, Eleicao e, Lista l, ListaDeCandidatos lc
+            WHERE e.id=l.eleicao_id and l.id=lc.lista_id and lc.pessoa_id=p.id and e.id=%s and p.tipo=%s
+        '''
+
+        cur.execute(search_statement, (election_id, user_type,))
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
+
+
+"""
 Search lists by election id
 """
 def get_place_where_user_voted(user_id, election_id):
