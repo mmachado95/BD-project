@@ -535,9 +535,12 @@ def details_of_past_elections_end(election_id):
         return render_template('details_of_past_elections_end.html', election=election, lists=lists)
 
     if type_of_election == 1:
-        lists_of_alunos = models.search_candidates_lists_by_type(election_id, 3)
-        lists_of_docentes = models.search_candidates_lists_by_type(election_id, 1)
-        lists_of_funcionarios = models.search_candidates_lists_by_type(election_id, 2)
+        lists_of_alunos = models.search_lists_of_election_1(election_id, 3)
+        lists_of_docentes = models.search_lists_of_election_1(election_id, 1)
+        lists_of_funcionarios = models.search_lists_of_election_1(election_id, 2)
+        print(lists_of_alunos)
+        print(lists_of_docentes)
+        print(lists_of_funcionarios)
         return render_template('details_of_past_elections_end_1.html', election=election,
         lists_of_alunos=lists_of_alunos, lists_of_docentes=lists_of_docentes, lists_of_funcionarios=lists_of_funcionarios)
 
@@ -546,9 +549,6 @@ def details_of_past_elections_end(election_id):
 def voting_table_status():
     voting_tables = models.search_voting_tables_of_election()
     return render_template('voting_table_status.html', voting_tables=voting_tables)
-
-
-
 
 # VOTE PAGES
 
