@@ -3,8 +3,9 @@
 
 {% block content %}
   <div class="container has-text-centered" style="margin-top:1.5%">
-    <p class="subtitle has-text-centered is-6">SABER EM QUE LOCAL VOTOU UM ELEITOR</p>
+    <p class="subtitle has-text-centered is-6">SABER LOCAL ONDE VOTOU UM ELEITOR</p>
     <p>User voted in: <strong>{{ place }}</strong></p>
+    <p>Date and Time of Vote: <strong>{{ moment }}</strong></p>
     <a href="{{ url_for('admin') }}" class="button is-link is-medium" style="margin-top:2%">Voltar</a>
   </div>
 {% endblock %}

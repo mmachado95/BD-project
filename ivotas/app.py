@@ -2,7 +2,6 @@ from flask import Flask, request, redirect, render_template, url_for, g, session
 from ivotas import models
 from ivotas import forms
 from ivotas import utils
-import time
 from datetime import datetime
 
 
@@ -114,8 +113,9 @@ def change_person(user_id):
     form = forms.ChangeUserForm(request.form)
 
     # missing validators
-    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
+    if request.method == 'POST' and utils.validate_user_change(form.name.data, form.password.data, form.contact.data, form.address.data, form.cc.data, form.end_date.data, form.type.data, form.is_admin.data):
         name = form.name.data
+        password = form.password.data
         organic_unit_id = form.organic_unit.data
         contact = form.contact.data
         address = form.address.data
@@ -127,6 +127,7 @@ def change_person(user_id):
         error = models.update_user(
             str(user_id),
             unidade_organica_id=str(organic_unit_id),
+            password=password,
             nome=name,
             contacto=contact,
             morada=address,
@@ -143,7 +144,7 @@ def change_person(user_id):
             return render_template('change_user.html', form=form, error=error)
 
         return redirect(url_for('admin'))
-    elif form.name.data is not None or form.organic_unit.choices is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
+    elif form.name.data is not None or form.organic_unit.choices is not None or form.password.data is not None or form.contact.data is not None or form.address.data is not None or form.cc.data is not None or form.end_date.data is not None or form.type.data is not None and form.is_admin.data is not None:
         error = 'Invalid input'
 
     user = models.search_user(user_id)
@@ -194,9 +195,9 @@ def delete_faculty():
         departments_of_faculty = models.get_departments(str(id_to_delete))
 
         for department in departments_of_faculty:
-            models.delete_data('unidade_organica', department[0])
+            models.delete_data('UnidadeOrganica', department[0])
 
-        models.delete_data('unidade_organica', id_to_delete)
+        models.delete_data('UnidadeOrganica', id_to_delete)
         return redirect(url_for('manage_faculty'))
     return render_template('faculty_forms.html', form=form, option=3)
 
@@ -242,7 +243,7 @@ def change_department(department_id):
         models.update_organic_unit(department_id, nome=name)
         models.update_department(department_id, faculdade_id=str(faculty_id))
         return redirect(url_for('manage_department'))
-    elif form.faculty.data != None:
+    elif form.faculty.data is not None:
         error = 'Nome inválido'
 
     department = models.search_department(department_id)
@@ -263,7 +264,7 @@ def delete_department():
 
     if request.method == 'POST' and form.validate():
         id_to_delete = form.department.data
-        models.delete_data('unidade_organica', id_to_delete)
+        models.delete_data('UnidadeOrganica', id_to_delete)
         return redirect(url_for('manage_department'))
     return render_template('department_forms.html', form=form, option=4, current_faculty=None, current_name=None)
 
@@ -295,7 +296,7 @@ def delete_voting_table():
 
     if request.method == 'POST' and form.validate():
         voting_table_id = form.voting_table.data
-        models.delete_data('mesa_de_voto', voting_table_id)
+        models.delete_data('MesaDeVoto', voting_table_id)
         return redirect(url_for('admin'))
     return render_template('voting_table_forms.html', form=form, option=4, current_election=None, current_organic_unit=None)
 
@@ -476,7 +477,7 @@ def delete_candidate_list():
 
     if request.method == 'POST' and form.validate():
         list = form.list.data
-        models.delete_data('lista', list)
+        models.delete_data('Lista', list)
         return redirect(url_for('admin'))
     return render_template('delete_candidate_list.html', form=form)
 
@@ -505,11 +506,10 @@ def know_where_user_voted_choose_election(user_id):
 
 @app.route('/know_where_user_voted/user_<int:user_id>/election_<int:election_id>', methods=['GET', 'POST'])
 def know_where_user_voted_end(user_id, election_id):
-    place = models.get_place_where_user_voted(user_id, election_id)[0]
-    return render_template('know_where_user_voted_end.html', place=place)
-
-
-
+    res = models.get_place_where_user_voted(user_id, election_id)
+    place = res[0]
+    moment = res[1]
+    return render_template('know_where_user_voted_end.html', place=place, moment=moment)
 
 
 @app.route('/details_of_past_elections', methods=['GET', 'POST'])
@@ -532,8 +532,16 @@ def details_of_past_elections_end(election_id):
     return render_template('details_of_past_elections_end.html', election=election, lists=lists)
 
 
+@app.route('/voting_table_status', methods=['GET', 'POST'])
+def voting_table_status():
+    voting_tables = models.search_voting_tables_of_election()
+
+    return render_template('voting_table_status.html', voting_tables=voting_tables)
 
 
+
+
+# VOTE PAGES
 
 @app.route('/choose_voting_table', methods=['GET', 'POST'])
 def vote_choose_voting_table():
@@ -556,11 +564,11 @@ def identify_user(voting_table_id):
         field = form.field.data
         text = form.text.data
         users_ids = models.search_user_by_fields(field, text)
-        voting_terminal_id = "1"
 
         if users_ids == []:
             error = 'No user found'
         else:
+            voting_terminal_id = models.create_voting_terminal(str(voting_table_id))
             return redirect(url_for('authenticate_user', voting_table_id=voting_table_id, voting_terminal_id=voting_terminal_id, users_ids=users_ids))
 
     return render_template('vote_identify_user.html', form=form, voting_table_id=voting_table_id, error=error)
@@ -587,6 +595,16 @@ def authenticate_user(voting_table_id, voting_terminal_id):
     return render_template('vote_authenticate_user.html', form=form, error=error)
 
 
+def user_can_vote(user_type, election_type):
+    if user_type == 1 and election_type == 2:
+        return False
+    if user_type == 2 and election_type != 1:
+        return False
+    if user_type == 3 and election_type != 1 and election_type != 2:
+        return False
+    return True
+
+
 @app.route('/voting_table_<int:voting_table_id>/voting_terminal_<int:voting_terminal_id>/vote', methods=['GET', 'POST'])
 def vote(voting_table_id, voting_terminal_id):
     user_id = eval(request.args.get('user_id'))
@@ -595,9 +613,18 @@ def vote(voting_table_id, voting_terminal_id):
 
     # Get Election id
     election_id = voting_table[1]
+    election = models.search_election(election_id, False)
+    election_end = election[3]
+    election_type = election[4]
+
+    # Get user type
+    user_type = models.search_user(user_id)[7]
 
     # Get lists of election
-    lists = models.search_lists_of_election(election_id, True)
+    if election_type == 1:
+        lists = models.search_candidates_lists_by_type(election_id, user_type)
+    else:
+        lists = models.search_lists_of_election(election_id, True)
 
     # Append Null and Blank votes
     lists.append((-1, 'Nulo'))
@@ -610,11 +637,9 @@ def vote(voting_table_id, voting_terminal_id):
     if request.method == 'POST' and form.validate():
         list = form.list.data
 
-        election = models.search_election(election_id, False)
-        election_end = election[3]
-        current_time = datetime.fromtimestamp(time.time())
-
         users_votes_in_election = models.check_user_vote_in_election(user_id, election_id)
+
+        current_time = datetime.now()
 
         # Election has ended
         if election_end < current_time:
@@ -623,6 +648,11 @@ def vote(voting_table_id, voting_terminal_id):
         # User has already voted
         elif users_votes_in_election != []:
             error = 'You have already voted in election.'
+            return render_template('vote_choose_list.html', form=form, error=error)
+        # User can't vote on this election
+        elif not user_can_vote(user_type, election_type):
+            print("entered here")
+            error = 'You can´t vote in this election'
             return render_template('vote_choose_list.html', form=form, error=error)
         else:
             # Create vote

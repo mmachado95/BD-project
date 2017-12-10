@@ -25,7 +25,7 @@ Safe get  connection to dabase
 def get_db(dbname):
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = connect_db('localhost', dbname, 'Machado', '')
+        db = g._database = connect_db('localhost', dbname, 'ivotasdb-user', '')
     return db
 
 
@@ -68,7 +68,7 @@ def get_update_statement(table, id_to_update, args):
         update_statement += key + '=' + "'" + value + "'"
         first_iter = False
 
-    if table == 'faculdade' or table == 'departamento':
+    if table == 'Faculdade' or table == 'Departamento':
         update_statement += ' WHERE unidade_organica_id=' + "'" + id_to_update + "'"
     else:
         update_statement += ' WHERE id=' + "'" + id_to_update + "'"
@@ -79,6 +79,7 @@ def get_update_statement(table, id_to_update, args):
 
 def set_user_form_values(form, user):
     form.name.data = user[2]
+    form.password.data = user[9]
     form.contact.data = user[3]
     form.address.data = user[4]
     form.cc.data = user[5]
@@ -87,14 +88,16 @@ def set_user_form_values(form, user):
     return form
 
 
-def validate_user_change(name, contact, address, cc, end_date, type, is_admin):
-    if name is None or (len(name) <= 1 or len(name) >= 100):
+def validate_user_change(name, password, contact, address, cc, end_date, type, is_admin):
+    if name is None or (len(name) < 1 or len(name) >= 100):
         return False
-    if contact is None or (len(contact) <= 1 or len(contact) >= 100):
+    if password is None or (len(password) < 1 or len(password) >= 100):
         return False
-    if address is None or (len(address) <= 1 or len(address) >= 100):
+    if contact is None or (len(contact) < 1 or len(contact) >= 100):
         return False
-    if cc is None or (len(cc) <= 1 or len(cc) >= 10):
+    if address is None or (len(address) < 1 or len(address) >= 100):
+        return False
+    if cc is None or (len(cc) < 1 or len(cc) >= 10):
         return False
     if end_date is None:
         return False

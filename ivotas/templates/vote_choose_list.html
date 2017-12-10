@@ -8,7 +8,7 @@
       <dl>
         {{ render_field(form.list) }}
       </dl>
-      <input type="submit" value="Votar" class="button is-primary is-medium" style="margin-top:2%"> <br>
+      <input type="submit" value="Votar" class="button is-warning is-medium" style="margin-top:2%"> <br>
       <a href="{{ url_for('index') }}" class="button is-link is-medium" style="margin-top:1%">Voltar</a>
       {% if error %}
         <p class="error"><strong>Error:</strong> {{ error }}

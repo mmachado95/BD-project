@@ -1,5 +1,5 @@
 import psycopg2
-import datetime
+from datetime import datetime
 from ivotas.utils import get_db, get_commands, get_search_statement, get_update_statement
 
 
@@ -73,12 +73,12 @@ def create_faculty(name):
         cur = get_db('ivotas').cursor()
 
         # create organic_unit
-        insert_statement = '''INSERT INTO unidade_organica(nome) VALUES(%s) RETURNING id'''
+        insert_statement = '''INSERT INTO UnidadeOrganica(nome) VALUES(%s) RETURNING id'''
         cur.execute(insert_statement, (name,))
         organic_unit_id = cur.fetchone()[0]
 
         # insert faculty in table
-        insert_statement = '''INSERT INTO faculdade(unidade_organica_id) VALUES(%s)'''
+        insert_statement = '''INSERT INTO Faculdade(unidade_organica_id) VALUES(%s)'''
         cur.execute(insert_statement, (organic_unit_id,))
 
         # commit the changes
@@ -103,13 +103,13 @@ def create_department(name, faculty_id):
         cur = get_db('ivotas').cursor()
 
         # create organic_unit
-        insert_statement = '''INSERT INTO unidade_organica(nome) VALUES(%s) RETURNING id'''
+        insert_statement = '''INSERT INTO UnidadeOrganica(nome) VALUES(%s) RETURNING id'''
         cur.execute(insert_statement, (name,))
         organic_unit_id = cur.fetchone()[0]
 
         # insert department in table
         insert_statement = '''
-            INSERT INTO departamento(unidade_organica_id, faculdade_id)
+            INSERT INTO Departamento(unidade_organica_id, faculdade_id)
             VALUES(%s, %s)
         '''
         cur.execute(insert_statement, (organic_unit_id, faculty_id,))
@@ -138,7 +138,7 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
 
         # insert user in table
         insert_statement = '''
-            INSERT INTO pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo, administrador)
+            INSERT INTO Pessoa(unidade_organica_id, nome, password, contacto, morada, cc, data_validade, tipo, administrador)
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
         cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin,))
@@ -170,13 +170,13 @@ def create_election(name, description, start, finished, type, organic_unit):
         # insert election in table
         if organic_unit is not None:
             insert_statement = '''
-                INSERT INTO eleicao(unidade_organica_id, nome, descricao, inicio, fim, tipo)
+                INSERT INTO Eleicao(unidade_organica_id, nome, descricao, inicio, fim, tipo)
                 VALUES(%s, %s, %s, %s, %s, %s)
             '''
             cur.execute(insert_statement, (organic_unit, name, description, start, finished, type,))
         else:
             insert_statement = '''
-                INSERT INTO eleicao(nome, descricao, inicio, fim, tipo)
+                INSERT INTO Eleicao(nome, descricao, inicio, fim, tipo)
                 VALUES(%s, %s, %s, %s, %s)
             '''
             cur.execute(insert_statement, (name, description, start, finished, type,))
@@ -204,7 +204,7 @@ def create_list(election_id, name):
 
         # insert list
         insert_statement = '''
-            INSERT INTO lista(eleicao_id, nome)
+            INSERT INTO Lista(eleicao_id, nome)
             VALUES(%s, %s)
             RETURNING id
         '''
@@ -234,7 +234,7 @@ def add_candidates(list_id, users_ids):
 
         # insert list
         insert_statement = '''
-            INSERT INTO lista_de_candidatos(lista_id, pessoa_id)
+            INSERT INTO ListaDeCandidatos(lista_id, pessoa_id)
             VALUES(%s, %s)
         '''
 
@@ -264,7 +264,7 @@ def create_voting_table(election_id, organic_unit_id):
 
         # insert voting table
         insert_statement = '''
-            INSERT INTO mesa_de_voto(eleicao_id, unidade_organica_id)
+            INSERT INTO MesaDeVoto(eleicao_id, unidade_organica_id)
             VALUES(%s, %s)
         '''
         cur.execute(insert_statement, (election_id, organic_unit_id,))
@@ -286,14 +286,17 @@ def create_voting_table(election_id, organic_unit_id):
 Create new voting terminal
 """
 def create_voting_terminal(voting_table_id):
+    voting_terminal_id = 0
+
     try:
         # connect to database and create cursor to execute commands in database session
         cur = get_db('ivotas').cursor()
 
         # insert voting terminal
         insert_statement = '''
-            INSERT INTO terminal_de_voto(mesa_de_voto_id)
+            INSERT INTO TerminalDeVoto(mesa_de_voto_id)
             VALUES(%s)
+            RETURNING ID
         '''
         cur.execute(insert_statement, (voting_table_id,))
 
@@ -304,10 +307,12 @@ def create_voting_terminal(voting_table_id):
         get_db('ivotas').rollback()
     else:
         get_db('ivotas').commit()
+        voting_terminal_id = cur.fetchone()[0]
 
     # close communication with the PostgreSQL database server
     if cur is not None:
         cur.close()
+    return voting_terminal_id
 
 
 """
@@ -320,10 +325,11 @@ def create_vote(user_id, voting_table_id):
 
         # insert vote
         insert_statement = '''
-            INSERT INTO voto(pessoa_id, mesa_de_voto_id)
-            VALUES(%s, %s)
+            INSERT INTO Voto(pessoa_id, mesa_de_voto_id, momento)
+            VALUES(%s, %s, %s)
         '''
-        cur.execute(insert_statement, (user_id, voting_table_id))
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cur.execute(insert_statement, (user_id, voting_table_id, now,))
 
         # commit the changes
         get_db('ivotas').commit()
@@ -356,26 +362,26 @@ def get_organic_units(type, dep_without_voting_tables):
             if type == 3:
                 search_statement = '''
                     SELECT id, nome
-                    FROM unidade_organica, faculdade
+                    FROM UnidadeOrganica, Faculdade
                     WHERE id=unidade_organica_id
                 '''
                 cur.execute(search_statement)
             elif type == 4:
                 search_statement = '''
                     SELECT id, nome
-                    FROM unidade_organica, departamento
+                    FROM UnidadeOrganica, Departamento
                     WHERE id=unidade_organica_id
                 '''
                 cur.execute(search_statement)
         elif dep_without_voting_tables:
-            now = datetime.datetime.now()
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             search_statement = '''
                 SELECT distinct(id), nome
-                FROM unidade_organica uo, departamento d, faculdade f
+                FROM UnidadeOrganica uo, Departamento d, Faculdade f
                 WHERE uo.id=f.unidade_organica_id OR uo.id=d.unidade_organica_id
                 AND id != ALL(
                     select distinct(mv.unidade_organica_id)
-                    from mesa_de_voto mv, eleicao e
+                    from MesaDeVoto mv, Eleicao e
                     where mv.eleicao_id=e.id and e.fim > timestamp %s
                 )
             '''
@@ -383,7 +389,7 @@ def get_organic_units(type, dep_without_voting_tables):
         else:
             search_statement = '''
                 SELECT id, nome
-                FROM unidade_organica
+                FROM UnidadeOrganica
             '''
             cur.execute(search_statement)
 
@@ -407,7 +413,7 @@ def get_faculties():
         # get faculties
         search_statement = '''
             SELECT id, nome
-            FROM unidade_organica, faculdade
+            FROM UnidadeOrganica, Faculdade
             WHERE id=unidade_organica_id
         '''
         cur.execute(search_statement)
@@ -433,7 +439,7 @@ def get_departments(of_faculty):
         if of_faculty is not None:
             search_statement = '''
                 SELECT id
-                FROM unidade_organica, departamento
+                FROM UnidadeOrganica, Departamento
                 WHERE id=unidade_organica_id AND faculdade_id=%s
                 GROUP BY id
             '''
@@ -441,7 +447,7 @@ def get_departments(of_faculty):
         else:
             search_statement = '''
                 SELECT id, nome
-                FROM unidade_organica, departamento
+                FROM UnidadeOrganica, Departamento
                 WHERE id=unidade_organica_id
             '''
             cur.execute(search_statement)
@@ -467,29 +473,29 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
         if form_friendly:
             search_statement = '''
                 SELECT id, nome
-                FROM eleicao
+                FROM Eleicao
             '''
             cur.execute(search_statement)
         elif future_elections:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT id, nome
-                FROM eleicao
+                FROM Eleicao
                 where inicio > timestamp %s;
             '''
             cur.execute(search_statement, (now,))
         elif future_and_present_elections:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT id, nome
-                FROM eleicao
+                FROM Eleicao
                 where inicio > timestamp %s or fim > timestamp %s;
             '''
             cur.execute(search_statement, (now, now,))
         else:
             search_statement = '''
                 SELECT *
-                FROM eleicao
+                FROM Eleicao
 
             '''
             cur.execute(search_statement)
@@ -499,8 +505,36 @@ def get_elections(form_friendly, future_elections, future_and_present_elections)
         # close communication with the PostgreSQL database server
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
         return []
     else:
+        return elections
+
+
+"""
+Get elections happening now
+"""
+def get_elections_present():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        # get elections
+        now = datetime.datetime.now()
+        search_statement = '''
+            SELECT id, nome
+            FROM eleicao
+            WHERE inicio < timestamp %s AND fim > timestamp %s;
+        '''
+        cur.execute(search_statement, (now, now,))
+
+        elections = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
         return elections
 
 
@@ -512,10 +546,10 @@ def get_elections_past():
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         search_statement = '''
             SELECT id, nome
-            FROM eleicao
+            FROM Eleicao
             where fim < timestamp %s;
         '''
 
@@ -542,22 +576,22 @@ def get_voting_tables(form_friendly, to_vote):
         if form_friendly:
             search_statement = '''
                 SELECT mv.id, e.nome || ' ' || uo.nome
-                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                FROM MesaDeVoto mv, Eleicao e, UnidadeOrganica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id
             '''
             cur.execute(search_statement)
         elif to_vote:
-            now = datetime.datetime.now()
+            now = datetime.now()
             search_statement = '''
                 SELECT mv.id, e.nome || ' ' || uo.nome
-                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
+                FROM MesaDeVoto mv, Eleicao e, UnidadeOrganica uo
                 WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and e.fim > timestamp %s
             '''
             cur.execute(search_statement, (now,))
         else:
             search_statement = '''
                 SELECT *
-                FROM eleicao
+                FROM Eleicao
             '''
             cur.execute(search_statement)
         elections = cur.fetchall()
@@ -582,12 +616,12 @@ def get_lists(form_friendly):
         if form_friendly:
             search_statement = '''
                 SELECT id, nome
-                FROM lista
+                FROM Lista
             '''
         else:
             search_statement = '''
                 SELECT *
-                FROM lista
+                FROM Lista
             '''
         cur.execute(search_statement)
         lists = cur.fetchall()
@@ -612,17 +646,17 @@ def get_users(form_friendly, by_type):
         if form_friendly:
             search_statement = '''
                 SELECT id, 'Nome: ' || nome || ' ' || 'CC: ' || cc "Identificador"
-                FROM pessoa
+                FROM Pessoa
             '''
             cur.execute(search_statement)
         elif by_type['status']:
             search_statement = '''
                 SELECT p.id, 'Nome: ' || p.nome || ' ' || 'CC: ' || p.cc "Identificador"
-                FROM pessoa p
+                FROM Pessoa p
                 WHERE tipo=%s
                 AND id!=all(
                     select lc.pessoa_id
-                    from lista l, lista_de_candidatos lc
+                    from Lista l, ListaDeCandidatos lc
                     where lc.lista_id=l.id and l.eleicao_id=%s
                 )
             '''
@@ -630,7 +664,7 @@ def get_users(form_friendly, by_type):
         else:
             search_statement = '''
                 SELECT *
-                FROM pessoa
+                FROM Pessoa
             '''
             cur.execute(search_statement)
         users = cur.fetchall()
@@ -653,7 +687,7 @@ def get_list_of_candidates(election_id):
 
         search_statement = '''
             SELECT *
-            FROM lista_de_candidatos
+            FROM ListaDeCandidatos
         '''
         cur.execute(search_statement)
         candidates = cur.fetchall()
@@ -678,7 +712,7 @@ def search_organic_unit(organic_unit_id):
         # search organic unit
         search_statement = '''
             SELECT nome
-            FROM unidade_organica
+            FROM UnidadeOrganica
             WHERE id=%s
         '''
         cur.execute(search_statement, (organic_unit_id,))
@@ -703,7 +737,7 @@ def search_department(department_id):
         # search department
         search_statement = '''
             SELECT faculdade_id, nome
-            FROM unidade_organica, departamento
+            FROM UnidadeOrganica, Departamento
             WHERE id=unidade_organica_id and id=%s
         '''
         cur.execute(search_statement, (department_id,))
@@ -718,46 +752,6 @@ def search_department(department_id):
 
 
 """
-Search voting table based on id
-"""
-def search_voting_table(voting_table_id, names, election_date):
-    voting_table_id = str(voting_table_id)
-    try:
-        # connect to database
-        cur = get_db('ivotas').cursor()
-
-        # search voting_table
-        if names:
-            search_statement = '''
-                SELECT mv.id, mv.eleicao_id, mv.unidade_organica_id, e.nome "Eleicao", uo.nome "Unidade Organica"
-                FROM mesa_de_voto mv, eleicao e, unidade_organica uo
-                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and mv.id=%s
-            '''
-        elif election_date:
-            search_statement = '''
-                SELECT inicio, fim
-                FROM mesa_de_voto mv, eleicao e
-                WHERE mv.eleicao_id=e.id and e.id=%s
-            '''
-        else:
-            search_statement = '''
-                SELECT eleicao_id, unidade_organica_id
-                FROM mesa_de_voto
-                WHERE id=%s
-            '''
-
-        cur.execute(search_statement, (voting_table_id,))
-        voting_table = cur.fetchone()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        return voting_table
-
-
-"""
 Search election by id
 """
 def search_election(election_id, returns_type):
@@ -769,13 +763,13 @@ def search_election(election_id, returns_type):
         if returns_type:
             search_statement = '''
                 SELECT tipo
-                FROM eleicao
+                FROM Eleicao
                 WHERE id=%s
             '''
         else:
             search_statement = '''
                 SELECT nome, descricao, inicio, fim, tipo, total_votos, votos_brancos, votos_nulos
-                FROM eleicao
+                FROM Eleicao
                 WHERE id=%s
             '''
 
@@ -802,7 +796,7 @@ def search_list(list_id):
 
         search_statement = '''
             SELECT id, eleicao_id, nome, numero_votos
-            FROM lista
+            FROM Lista
             WHERE id=%s
         '''
 
@@ -828,7 +822,7 @@ def search_voting_table(voting_table_id):
 
         search_statement = '''
             SELECT id, eleicao_id, unidade_organica_id
-            FROM mesa_de_voto
+            FROM MesaDeVoto
             WHERE id=%s
         '''
 
@@ -844,6 +838,35 @@ def search_voting_table(voting_table_id):
 
 
 """
+Search voting tables by election id
+"""
+def search_voting_tables_of_election():
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME, COUNT(votes_of_voting_table)
+            FROM (SELECT mv.id MV_ID, e.id E_ID, e.nome E_NOME
+                    FROM eleicao e, MesaDeVoto mv, voto v
+                    WHERE e.id=mv.eleicao_id AND mv.id=v.mesa_de_voto_id
+            ) AS votes_of_voting_table
+            GROUP BY votes_of_voting_table.MV_ID, votes_of_voting_table.E_ID, votes_of_voting_table.E_NOME
+            ORDER BY votes_of_voting_table.E_ID
+        '''
+
+        cur.execute(search_statement)
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
+
+
+"""
 Search elections that user voted
 """
 def search_elections_that_user_voted(user_id):
@@ -854,7 +877,7 @@ def search_elections_that_user_voted(user_id):
 
         search_statement = '''
             SELECT e.id, e.nome
-            FROM eleicao e, mesa_de_voto mv, pessoa p, voto v
+            FROM Eleicao e, MesaDeVoto mv, Pessoa p, Voto v
             WHERE p.id=%s AND p.id=v.id AND v.mesa_de_voto_id=mv.id and mv.eleicao_id=e.id
         '''
 
@@ -879,8 +902,8 @@ def search_user(user_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador
-            FROM pessoa
+            SELECT id, unidade_organica_id, nome, contacto, morada, cc, data_validade, tipo, administrador, password
+            FROM Pessoa
             WHERE id=%s
         '''
 
@@ -907,7 +930,7 @@ def search_user_by_fields(field_type, field_text):
         if field_type == 1:
             search_statement = '''
                 SELECT id
-                FROM pessoa
+                FROM Pessoa
                 WHERE nome=%s
             '''
 
@@ -915,7 +938,7 @@ def search_user_by_fields(field_type, field_text):
         if field_type == 2:
             search_statement = '''
                 SELECT id
-                FROM pessoa
+                FROM Pessoa
                 WHERE cc=%s
             '''
 
@@ -942,13 +965,13 @@ def search_user_by_username_and_password(nome, password, is_admin):
         if is_admin:
             search_statement = '''
                 SELECT id
-                FROM pessoa
+                FROM Pessoa
                 WHERE nome=%s AND password=%s AND administrador IS TRUE
             '''
         else:
             search_statement = '''
                 SELECT id
-                FROM pessoa
+                FROM Pessoa
                 WHERE nome=%s AND password=%s
             '''
         cur.execute(search_statement, (nome, password,))
@@ -974,18 +997,44 @@ def search_lists_of_election(election_id, form_friendly):
         if form_friendly:
             search_statement = '''
                 SELECT id, nome
-                FROM lista
+                FROM Lista
                 WHERE eleicao_id=%s
             '''
 
         else:
             search_statement = '''
                 SELECT nome, numero_votos
-                FROM lista
+                FROM Lista
                 WHERE eleicao_id=%s
             '''
 
         cur.execute(search_statement, (election_id,))
+        lists = cur.fetchall()
+
+        # close communication with the PostgreSQL database server
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        return lists
+
+
+"""
+Search lists of candidates
+"""
+def search_candidates_lists_by_type(election_id, user_type):
+    election_id = str(election_id)
+    try:
+        # connect to database
+        cur = get_db('ivotas').cursor()
+
+        search_statement = '''
+            SELECT distinct(l.id), l.nome
+            FROM Pessoa p, Eleicao e, Lista l, ListaDeCandidatos lc
+            WHERE e.id=l.eleicao_id and l.id=lc.lista_id and lc.pessoa_id=p.id and e.id=%s and p.tipo=%s
+        '''
+
+        cur.execute(search_statement, (election_id, user_type,))
         lists = cur.fetchall()
 
         # close communication with the PostgreSQL database server
@@ -1006,8 +1055,8 @@ def get_place_where_user_voted(user_id, election_id):
         cur = get_db('ivotas').cursor()
 
         search_statement = '''
-            SELECT uo.nome
-            FROM unidade_organica uo, eleicao e, mesa_de_voto mv, voto v, pessoa p
+            SELECT uo.nome, v.momento
+            FROM UnidadeOrganica uo, Eleicao e, MesaDeVoto mv, Voto v, Pessoa p
             WHERE mv.eleicao_id=e.id AND mv.id=v.mesa_de_voto_id AND mv.unidade_organica_id=uo.id AND v.pessoa_id=p.id AND p.id=%s AND e.id=%s
         '''
 
@@ -1037,7 +1086,7 @@ def update_organic_unit(id_to_update, **kwargs):
         cur = get_db('ivotas').cursor()
 
         # update faculty
-        update_statement = get_update_statement('unidade_organica', id_to_update, kwargs)
+        update_statement = get_update_statement('UnidadeOrganica', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change
@@ -1062,8 +1111,8 @@ def update_department(id_to_update, **kwargs):
         # connect to database
         cur = get_db('ivotas').cursor()
 
-        # update faculty
-        update_statement = get_update_statement('departamento', id_to_update, kwargs)
+        # update Department
+        update_statement = get_update_statement('Departamento', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change
@@ -1091,7 +1140,7 @@ def update_user(id_to_update, **kwargs):
 
     try:
         # update user
-        update_statement = get_update_statement('pessoa', id_to_update, kwargs)
+        update_statement = get_update_statement('Pessoa', id_to_update, kwargs)
         cur.execute(update_statement)
 
     except psycopg2.IntegrityError as e:
@@ -1117,7 +1166,7 @@ def update_election(id_to_update, **kwargs):
         cur = get_db('ivotas').cursor()
 
         # update election
-        update_statement = get_update_statement('eleicao', id_to_update, kwargs)
+        update_statement = get_update_statement('Eleicao', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change
@@ -1143,7 +1192,7 @@ def update_list(id_to_update, **kwargs):
         cur = get_db('ivotas').cursor()
 
         # update list
-        update_statement = get_update_statement('lista', id_to_update, kwargs)
+        update_statement = get_update_statement('Lista', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change
@@ -1169,7 +1218,7 @@ def update_voting_table(id_to_update, **kwargs):
         cur = get_db('ivotas').cursor()
 
         # update voting table
-        update_statement = get_update_statement('mesa_de_voto', id_to_update, kwargs)
+        update_statement = get_update_statement('MesaDeVoto', id_to_update, kwargs)
         cur.execute(update_statement)
 
         # commit change
@@ -1200,7 +1249,7 @@ def delete_data(table, id_to_delete):
         cur = get_db('ivotas').cursor()
 
         # delete
-        if table == 'lista_de_candidatos':
+        if table == 'ListaDeCandidatos':
             delete_statement = 'DELETE FROM ' + table + ' WHERE pessoa_id=%s'
         else:
             delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
@@ -1228,7 +1277,7 @@ def check_user_vote_in_election(user_id, election_id):
 
         search_statement = '''
             SELECT p.id
-            FROM pessoa p, voto v, mesa_de_voto mv
+            FROM Pessoa p, Voto v, MesaDeVoto mv
             WHERE p.id=v.pessoa_id and v.mesa_de_voto_id=mv.id and p.id=%s and mv.eleicao_id=%s;
         '''
 

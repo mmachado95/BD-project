@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container has-text-centered" style="margin-top:2%">
+    <p class="subtitle has-text-centered is-6">ESTADO DAS MESAS DE VOTO</p>
+    {% for vt in voting_tables %}
+      <p>ID Mesa de Voto: {{ vt[0] }}</p>
+      <p>ID Eleição: {{ vt[1] }}</p>
+      <p>Nome Eleição: {{ vt[2] }}</p>
+      <p>Número de votos da mesa de voto da eleicao {{ vt[2] }}: {{ vt[3] }}</p>
+      <br><br>
+    {% endfor %}
+    <a href="{{ url_for('admin') }}" class="button is-link is-medium">Voltar</a>
+  </div>
+{% endblock %}
