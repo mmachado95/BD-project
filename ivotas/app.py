@@ -4,6 +4,8 @@ from ivotas import forms
 from ivotas import utils
 from datetime import datetime
 
+import click
+
 
 app = Flask(__name__)
 app.secret_key = b'\xe0\xbe]\xb3\x1eK"\xf2\xf1\xb9\xd0\xf8\xa8$\xdb\x9b\x89\xc1t>\xed\x86\xa4\x00'
@@ -18,12 +20,10 @@ def close_db(exception):
     if db is not None:
         db.close
 
-
-@app.route("/defesa")
-def defesa():
+@app.cli.command()
+def first_use():
     models.create_tables()
     models.seed_tables()
-    return redirect(url_for('index'))
 
 
 @app.route("/")
