@@ -554,9 +554,9 @@ def get_voting_tables(form_friendly, to_vote):
             search_statement = '''
                 SELECT mv.id, e.nome || ' ' || uo.nome
                 FROM MesaDeVoto mv, Eleicao e, UnidadeOrganica uo
-                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and e.fim > timestamp %s
+                WHERE mv.eleicao_id=e.id and mv.unidade_organica_id=uo.id and e.inicio <= timestamp %s and e.fim > timestamp %s
             '''
-            cur.execute(search_statement, (now,))
+            cur.execute(search_statement, (now, now,))
         else:
             search_statement = '''
                 SELECT *
