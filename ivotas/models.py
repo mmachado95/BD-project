@@ -19,9 +19,6 @@ def create_tables():
             if command.strip() != '' or command[0:2]=='--':
                 cur.execute(command)
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -46,9 +43,6 @@ def seed_tables():
         for command in commands:
             if command.strip() != '':
                 cur.execute(command)
-
-        # commit the changes
-        get_db('ivotas').commit()
 
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
@@ -81,9 +75,6 @@ def create_faculty(name):
         insert_statement = '''INSERT INTO Faculdade(unidade_organica_id) VALUES(%s)'''
         cur.execute(insert_statement, (organic_unit_id,))
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -114,9 +105,6 @@ def create_department(name, faculty_id):
         '''
         cur.execute(insert_statement, (organic_unit_id, faculty_id,))
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -142,9 +130,6 @@ def create_user(organic_unit_id, name, password, contact, address, cc, end_date,
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
         cur.execute(insert_statement, (organic_unit_id, name, password, contact, address, cc, end_date, type, is_admin,))
-
-        # commit the changes
-        get_db('ivotas').commit()
 
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
@@ -181,9 +166,6 @@ def create_election(name, description, start, finished, type, organic_unit):
             '''
             cur.execute(insert_statement, (name, description, start, finished, type,))
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -213,9 +195,6 @@ def create_list(election_id, name):
         # fetch id that was inserted
         list_id = cur.fetchone()[0]
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -241,8 +220,6 @@ def add_candidates(list_id, users_ids):
         # add users to list
         for user_id in users_ids:
             cur.execute(insert_statement, (str(list_id), str(user_id)))
-        # commit the changes
-        get_db('ivotas').commit()
 
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
@@ -268,9 +245,6 @@ def create_voting_table(election_id, organic_unit_id):
             VALUES(%s, %s)
         '''
         cur.execute(insert_statement, (election_id, organic_unit_id,))
-
-        # commit the changes
-        get_db('ivotas').commit()
 
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
@@ -300,9 +274,6 @@ def create_voting_terminal(voting_table_id):
         '''
         cur.execute(insert_statement, (voting_table_id,))
 
-        # commit the changes
-        get_db('ivotas').commit()
-
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
     else:
@@ -330,9 +301,6 @@ def create_vote(user_id, voting_table_id):
         '''
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         cur.execute(insert_statement, (user_id, voting_table_id, now,))
-
-        # commit the changes
-        get_db('ivotas').commit()
 
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
@@ -1090,9 +1058,6 @@ def update_organic_unit(id_to_update, **kwargs):
         update_statement = get_update_statement('UnidadeOrganica', id_to_update, kwargs)
         cur.execute(update_statement)
 
-        # commit change
-        get_db('ivotas').commit()
-
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
     else:
@@ -1115,9 +1080,6 @@ def update_department(id_to_update, **kwargs):
         # update Department
         update_statement = get_update_statement('Departamento', id_to_update, kwargs)
         cur.execute(update_statement)
-
-        # commit change
-        get_db('ivotas').commit()
 
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
@@ -1170,9 +1132,6 @@ def update_election(id_to_update, **kwargs):
         update_statement = get_update_statement('Eleicao', id_to_update, kwargs)
         cur.execute(update_statement)
 
-        # commit change
-        get_db('ivotas').commit()
-
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
     else:
@@ -1195,9 +1154,6 @@ def update_list(id_to_update, **kwargs):
         # update list
         update_statement = get_update_statement('Lista', id_to_update, kwargs)
         cur.execute(update_statement)
-
-        # commit change
-        get_db('ivotas').commit()
 
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
@@ -1222,11 +1178,6 @@ def update_voting_table(id_to_update, **kwargs):
         update_statement = get_update_statement('MesaDeVoto', id_to_update, kwargs)
         cur.execute(update_statement)
 
-        # commit change
-        get_db('ivotas').commit()
-
-        # close communication with the PostgreSQL database server
-        cur.close()
     except psycopg2.IntegrityError as e:
         get_db('ivotas').rollback()
     else:
@@ -1255,9 +1206,6 @@ def delete_data(table, id_to_delete):
         else:
             delete_statement = 'DELETE FROM ' + table + ' WHERE id=%s'
         cur.execute(delete_statement, (id_to_delete,))
-
-        # commit change
-        get_db('ivotas').commit()
 
     except psycopg2.DatabaseError as e:
         get_db('ivotas').rollback()
