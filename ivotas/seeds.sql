@@ -32,12 +32,16 @@ VALUES
 
 INSERT INTO Eleicao(nome, descricao, inicio, fim, tipo)
 VALUES
-  ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', 2);
+  ('NEI', 'Nucleo de estudantes de informatica', '2017-11-20 22:00:00', '2017-12-13 10:15:00', 2),
+  ('CG 1', 'Conselho Geral 1', '2017-11-20 22:00:00', '2017-11-21 10:15:00', 1);
 
 INSERT INTO Lista(eleicao_id, nome)
 VALUES
   (1, 'LISTA A'),
-  (1, 'LISTA B');
+  (1, 'LISTA B'),
+  (2, 'LISTA CG1'),
+  (2, 'LISTA CG2');
+
 
 INSERT INTO ListaDeCandidatos(lista_id, pessoa_id)
 VALUES
@@ -47,7 +51,8 @@ VALUES
 
 INSERT INTO MesaDeVoto(eleicao_id, unidade_organica_id)
 VALUES
-  (1, 1);
+  (1, 1),
+  (2, 1);
 
 INSERT INTO TerminalDeVoto(mesa_de_voto_id)
 VALUES

@@ -20,7 +20,7 @@ def connect_db(_host, _dbname, _user, _password):
 
 
 """
-Safe get  connection to dabase
+Safe get connection to database
 """
 def get_db(dbname):
     db = getattr(g, '_database', None)
@@ -73,7 +73,6 @@ def get_update_statement(table, id_to_update, args):
     else:
         update_statement += ' WHERE id=' + "'" + id_to_update + "'"
 
-    print(update_statement)
     return update_statement
 
 

@@ -547,6 +547,7 @@ def get_elections_past():
         cur = get_db('ivotas').cursor()
 
         now = datetime.now()
+
         search_statement = '''
             SELECT id, nome
             FROM Eleicao
